@@ -1,5 +1,7 @@
 // src/App.jsx
 import { useEffect, useState } from "react";
+import { useUser } from "@clerk/clerk-react";
+
 import HeroDoor from "./sections/HeroDoor";
 import LightHallway from "./sections/LightHallway";
 import LightBedroom from "./sections/LightBedroom";
@@ -9,31 +11,33 @@ import DarkBedroom from "./sections/DarkBedroom";
 import DarkPlayroom from "./sections/DarkPlayroom";
 
 export default function App() {
-  const [mode, setMode] = useState("light");       // "light" | "dark"
-  const [hasAccess, setHasAccess] = useState(false); // guest/admin access to house
-  const [isInside, setIsInside] = useState(false);   // actually viewing rooms
+  const { isSignedIn } = useUser();
+  const [mode, setMode] = useState("light");
+  const [hasKeypadAccess, setHasKeypadAccess] = useState(false);
+  const [isInside, setIsInside] = useState(false);
 
-  // Load stored access (so you don't need to re-enter every visit)
+  // keypad access persisted locally
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const stored = window.localStorage.getItem("wok360-access");
-    if (stored === "granted") setHasAccess(true);
+    const stored = window.localStorage.getItem("wok360-keypad-access");
+    if (stored === "granted") setHasKeypadAccess(true);
   }, []);
 
-  // Called when login/registration OR keypad succeed
-  const handleAccessGranted = () => {
-    setHasAccess(true);
+  const canEnter = isSignedIn || hasKeypadAccess;
+
+  const handleKeypadAccess = () => {
+    setHasKeypadAccess(true);
     if (typeof window !== "undefined") {
-      window.localStorage.setItem("wok360-access", "granted");
+      window.localStorage.setItem("wok360-keypad-access", "granted");
     }
   };
 
-  // Called when user taps "Enter House"
   const handleEnterHouse = () => {
+    if (!canEnter) return; // extra guard
     setIsInside(true);
     setMode("light");
 
-    // Scroll to light hallway once it exists in the DOM
+    // scroll to light hallway
     setTimeout(() => {
       const el = document.getElementById("light-hallway");
       if (el) el.scrollIntoView({ behavior: "smooth" });
@@ -52,12 +56,13 @@ export default function App() {
       ].join(" ")}
     >
       <HeroDoor
-        hasAccess={hasAccess}
-        onAccessGranted={handleAccessGranted}
+        isSignedIn={isSignedIn}
+        canEnter={canEnter}
+        onKeypadAccess={handleKeypadAccess}
         onEnterHouse={handleEnterHouse}
       />
 
-      {/* Only render the inside of the house once user has entered */}
+      {/* Only render rooms AFTER they’ve entered the house */}
       {isInside && (
         <>
           {mode === "light" ? (

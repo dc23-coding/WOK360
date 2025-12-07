@@ -1,16 +1,30 @@
 // src/sections/HeroDoor.jsx
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { SignIn, SignUp } from "@clerk/clerk-react";
 import RoomSection from "../components/RoomSection";
 
 const CORRECT_CODE = "3104";
 
-export default function HeroDoor({ hasAccess, onAccessGranted, onEnterHouse }) {
+export default function HeroDoor({
+  isSignedIn,
+  canEnter,
+  onKeypadAccess,
+  onEnterHouse,
+}) {
   const [showKeypad, setShowKeypad] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
+  const [authTab, setAuthTab] = useState("signin"); // 'signin' | 'signup'
   const [input, setInput] = useState("");
   const [error, setError] = useState("");
 
-  // ---- Keypad logic ----
+  // close auth overlay automatically once Clerk signs user in
+  useEffect(() => {
+    if (isSignedIn && showAuth) {
+      setShowAuth(false);
+    }
+  }, [isSignedIn, showAuth]);
+
+  // ----- keypad logic -----
   const handleDigit = (d) => {
     setError("");
     if (input.length >= 4) return;
@@ -20,7 +34,7 @@ export default function HeroDoor({ hasAccess, onAccessGranted, onEnterHouse }) {
     if (next.length === 4) {
       if (next === CORRECT_CODE) {
         setTimeout(() => {
-          onAccessGranted();   // device now has access
+          onKeypadAccess(); // mark this device as trusted
           setShowKeypad(false);
           setInput("");
         }, 120);
@@ -36,16 +50,10 @@ export default function HeroDoor({ hasAccess, onAccessGranted, onEnterHouse }) {
     setError("");
   };
 
-  // ---- Fake auth success for now (register/login panel) ----
-  const handleAuthSuccess = () => {
-    onAccessGranted();
-    setShowAuth(false);
-  };
-
   return (
     <RoomSection bg="/Frontdoor_Main.png" className="bg-black">
       <div className="relative w-full h-full flex flex-col items-center justify-center text-center text-amber-50 px-4">
-        {/* Title / copy */}
+        {/* TITLE */}
         <div className="mb-10">
           <h1 className="text-3xl md:text-5xl font-semibold tracking-tight">
             World of Karma 360
@@ -56,7 +64,7 @@ export default function HeroDoor({ hasAccess, onAccessGranted, onEnterHouse }) {
           </p>
         </div>
 
-        {/* GLOWING PLATE ATTACHED TO DOOR */}
+        {/* GLOWING PLATE */}
         <div
           className="
             relative
@@ -71,8 +79,8 @@ export default function HeroDoor({ hasAccess, onAccessGranted, onEnterHouse }) {
         >
           <div className="pointer-events-none absolute inset-0 rounded-[30px] bg-gradient-to-b from-amber-50/8 via-transparent to-amber-200/18" />
 
-          {/* ---- STATE 3: ACCESS GRANTED (ENTER HOUSE) ---- */}
-          {hasAccess && !showKeypad && (
+          {/* ---- ACCESS GRANTED (ENTER HOUSE) ---- */}
+          {canEnter && !showKeypad && (
             <div className="relative z-10 flex flex-col items-center gap-3">
               <p className="text-[10px] uppercase tracking-[0.3em] text-amber-300/80">
                 Access granted
@@ -109,8 +117,8 @@ export default function HeroDoor({ hasAccess, onAccessGranted, onEnterHouse }) {
             </div>
           )}
 
-          {/* ---- STATE 1: GUEST VIEW (NO ACCESS YET) ---- */}
-          {!hasAccess && !showKeypad && (
+          {/* ---- GUEST VIEW (NO ACCESS YET) ---- */}
+          {!canEnter && !showKeypad && (
             <div className="relative z-10 flex flex-col items-center gap-4">
               <p className="text-[10px] uppercase tracking-[0.3em] text-amber-300/80">
                 Welcome guest
@@ -134,7 +142,7 @@ export default function HeroDoor({ hasAccess, onAccessGranted, onEnterHouse }) {
               </button>
 
               <p className="mt-1 text-[10px] text-amber-100/65 max-w-[200px]">
-                You&apos;ll get a personal key to move through the house.
+                Your account becomes your personal key to the house.
               </p>
 
               <button
@@ -147,7 +155,7 @@ export default function HeroDoor({ hasAccess, onAccessGranted, onEnterHouse }) {
             </div>
           )}
 
-          {/* ---- STATE 2: KEYPAD (SECRET / ADMIN PATH) ---- */}
+          {/* ---- KEYPAD (SECRET PATH) ---- */}
           {showKeypad && (
             <div className="relative z-10 flex flex-col items-center gap-4">
               <div className="w-full flex justify-between items-center mb-1">
@@ -184,7 +192,7 @@ export default function HeroDoor({ hasAccess, onAccessGranted, onEnterHouse }) {
                 <p className="text-[10px] text-red-300/90 h-3">{error}</p>
               )}
 
-              {/* keypad */}
+              {/* keypad grid */}
               <div className="grid grid-cols-3 gap-2 text-sm">
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
                   <button
@@ -229,7 +237,7 @@ export default function HeroDoor({ hasAccess, onAccessGranted, onEnterHouse }) {
                     border border-amber-200/40
                     hover:bg-amber-100/20
                     transition
-                    "
+                  "
                 >
                   0
                 </button>
@@ -237,16 +245,16 @@ export default function HeroDoor({ hasAccess, onAccessGranted, onEnterHouse }) {
               </div>
 
               <p className="mt-1 text-[10px] text-amber-100/60">
-                4-digit admin path. Keep this between us.
+                4-digit admin route. Keep this between us.
               </p>
             </div>
           )}
         </div>
 
-        {/* Simple auth panel overlay (login / register placeholder) */}
+        {/* ---- CLERK AUTH OVERLAY (REGISTER / LOGIN) ---- */}
         {showAuth && (
           <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-20">
-            <div className="w-[320px] max-w-[90%] rounded-3xl bg-[#050507] border border-amber-200/30 px-6 py-5 text-left">
+            <div className="w-[360px] max-w-[92%] rounded-3xl bg-[#050507] border border-amber-200/30 px-6 py-5 text-left">
               <div className="flex justify-between items-center mb-3">
                 <h2 className="text-sm font-semibold text-amber-100">
                   Sign in or create account
@@ -259,25 +267,45 @@ export default function HeroDoor({ hasAccess, onAccessGranted, onEnterHouse }) {
                 </button>
               </div>
 
-              {/* You can replace this with real auth later */}
-              <div className="space-y-3 text-[11px] text-amber-100/80">
-                <p>
-                  This is a placeholder panel. When you wire up real auth,
-                  call <code>onAccessGranted()</code> on success.
-                </p>
+              <div className="flex gap-3 mb-4 text-[11px]">
                 <button
-                  type="button"
-                  onClick={handleAuthSuccess}
-                  className="
-                    mt-2 w-full px-4 py-2
-                    rounded-full bg-amber-400 text-black text-xs font-semibold
-                    shadow-[0_0_20px_rgba(252,211,77,0.8)]
-                    hover:bg-amber-300
-                    transition
-                  "
+                  className={`px-3 py-1 rounded-full ${
+                    authTab === "signin"
+                      ? "bg-amber-300 text-black"
+                      : "bg-transparent border border-amber-200/40 text-amber-100"
+                  }`}
+                  onClick={() => setAuthTab("signin")}
                 >
-                  Continue (mock success)
+                  Sign in
                 </button>
+                <button
+                  className={`px-3 py-1 rounded-full ${
+                    authTab === "signup"
+                      ? "bg-amber-300 text-black"
+                      : "bg-transparent border border-amber-200/40 text-amber-100"
+                  }`}
+                  onClick={() => setAuthTab("signup")}
+                >
+                  Create account
+                </button>
+              </div>
+
+              <div className="text-xs text-amber-100/80">
+                {authTab === "signin" ? (
+                  <SignIn
+                    routing="hash"
+                    path="/sign-in"
+                    signUpUrl="#/sign-up"
+                    appearance={{ elements: { card: "bg-transparent shadow-none border-none" } }}
+                  />
+                ) : (
+                  <SignUp
+                    routing="hash"
+                    path="/sign-up"
+                    signInUrl="#/sign-in"
+                    appearance={{ elements: { card: "bg-transparent shadow-none border-none" } }}
+                  />
+                )}
               </div>
             </div>
           </div>

@@ -4,9 +4,11 @@ import ReactDOM from "react-dom/client";
 import { ClerkProvider } from "@clerk/clerk-react";
 import App from "./App";
 
+// 🔹 ADD THIS LINE (or the correct path to your global CSS)
+import "./index.css"; // or "./styles.css" if that's what you use
+
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
-// 🔍 Debug: log what Vite actually loaded
 console.log("import.meta.env:", import.meta.env);
 console.log("VITE_CLERK_PUBLISHABLE_KEY:", PUBLISHABLE_KEY);
 

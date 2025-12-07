@@ -1,87 +1,89 @@
 // src/App.jsx
-import { useEffect, useState } from "react";
-import { useUser } from "@clerk/clerk-react";
+import React, { useRef, useState } from "react";
+import { useUser, UserButton } from "@clerk/clerk-react";
 
 import HeroDoor from "./sections/HeroDoor";
 import LightHallway from "./sections/LightHallway";
 import LightBedroom from "./sections/LightBedroom";
-import LightStudio from "./sections/LightStudio";
 import DarkHallway from "./sections/DarkHallway";
 import DarkBedroom from "./sections/DarkBedroom";
 import DarkPlayroom from "./sections/DarkPlayroom";
 
 export default function App() {
   const { isSignedIn } = useUser();
-  const [mode, setMode] = useState("light");
-  const [hasKeypadAccess, setHasKeypadAccess] = useState(false);
-  const [isInside, setIsInside] = useState(false);
 
-  // keypad access persisted locally
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const stored = window.localStorage.getItem("wok360-keypad-access");
-    if (stored === "granted") setHasKeypadAccess(true);
-  }, []);
+  // Admin / keypad-based access
+  const [hasAdminAccess, setHasAdminAccess] = useState(false);
 
-  const canEnter = isSignedIn || hasKeypadAccess;
+  // User can enter the house if signed in OR admin code was used
+  const canEnter = isSignedIn || hasAdminAccess;
+
+  // Where "Enter House" should scroll to
+  const lightHallwayRef = useRef(null);
 
   const handleKeypadAccess = () => {
-    setHasKeypadAccess(true);
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem("wok360-keypad-access", "granted");
-    }
+    setHasAdminAccess(true);
   };
 
   const handleEnterHouse = () => {
-    if (!canEnter) return; // extra guard
-    setIsInside(true);
-    setMode("light");
-
-    // scroll to light hallway
-    setTimeout(() => {
-      const el = document.getElementById("light-hallway");
-      if (el) el.scrollIntoView({ behavior: "smooth" });
-    }, 50);
-  };
-
-  const toggleMode = () => {
-    setMode((m) => (m === "light" ? "dark" : "light"));
+    if (lightHallwayRef.current) {
+      lightHallwayRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
   };
 
   return (
-    <div
-      className={[
-        "h-screen w-full overflow-y-scroll snap-y snap-mandatory",
-        mode === "dark" ? "bg-black text-cyan-50" : "bg-amber-50 text-amber-900",
-      ].join(" ")}
-    >
-      <HeroDoor
-        isSignedIn={isSignedIn}
-        canEnter={canEnter}
-        onKeypadAccess={handleKeypadAccess}
-        onEnterHouse={handleEnterHouse}
-      />
-
-      {/* Only render rooms AFTER they’ve entered the house */}
-      {isInside && (
-        <>
-          {mode === "light" ? (
-            <>
-              <div id="light-hallway">
-                <LightHallway mode={mode} onToggleMode={toggleMode} />
-              </div>
-              <LightBedroom onToggleMode={toggleMode} />
-              <LightStudio />
-            </>
-          ) : (
-            <>
-              <DarkHallway mode={mode} onToggleMode={toggleMode} />
-              <DarkBedroom onToggleMode={toggleMode} />
-              <DarkPlayroom />
-            </>
-          )}
-        </>
+    <div className="relative min-h-screen bg-black text-white">
+      {/* Floating user / sign-out button when signed in */}
+      {isSignedIn && (
+        <div className="fixed top-4 right-4 z-50">
+          <UserButton
+            afterSignOutUrl="/"
+            appearance={{
+              elements: {
+                avatarBox:
+                  "w-9 h-9 border border-amber-300/80 rounded-full " +
+                  "shadow-[0_0_18px_rgba(252,211,77,0.85)]",
+              },
+            }}
+          />
+        </div>
       )}
+
+      {/* FRONT DOOR */}
+      <section id="front-door" className="h-screen">
+        <HeroDoor
+          isSignedIn={isSignedIn}
+          canEnter={canEnter}
+          onKeypadAccess={handleKeypadAccess}
+          onEnterHouse={handleEnterHouse}
+        />
+      </section>
+
+      {/* INTERIOR SECTIONS */}
+      <main className="w-full">
+        <section id="light-hallway" ref={lightHallwayRef}>
+          <LightHallway />
+        </section>
+
+        <section id="light-bedroom">
+          <LightBedroom />
+        </section>
+
+        <section id="dark-hallway">
+          <DarkHallway />
+        </section>
+
+        <section id="dark-bedroom">
+          <DarkBedroom />
+        </section>
+
+        <section id="dark-playroom">
+          <DarkPlayroom />
+        </section>
+      </main>
     </div>
   );
 }

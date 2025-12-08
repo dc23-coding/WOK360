@@ -24,7 +24,8 @@ const EXTRACTION_REGEX = {
   helmet: /<Helmet[^>]*?>([\s\S]*?)<\/Helmet>/i,
   helmetTest: /<Helmet[\s\S]*?<\/Helmet>/i,
   title: /<title[^>]*?>\s*(.*?)\s*<\/title>/i,
-  description: /<meta\s+name=["']description["']\s+content=["'](.*?)["']/i
+  description: /<meta\s+name=["']description["']\s+content=["'](.*?)["']\/?/i,
+  h1: /<h1[^>]*>([\s\S]*?)<\/h1>/i
 };
 
 function cleanContent(content) {
@@ -87,26 +88,38 @@ function findReactFiles(dir) {
 
 function extractHelmetData(content, filePath, routes) {
   const cleanedContent = cleanContent(content);
-  
-  if (!EXTRACTION_REGEX.helmetTest.test(cleanedContent)) {
-    return null;
+
+  // Prefer explicit Helmet metadata when present
+  let title;
+  let description;
+
+  if (EXTRACTION_REGEX.helmetTest.test(cleanedContent)) {
+    const helmetMatch = content.match(EXTRACTION_REGEX.helmet);
+    const helmetContent = helmetMatch?.[1] || '';
+    const titleMatch = helmetContent.match(EXTRACTION_REGEX.title);
+    const descMatch = helmetContent.match(EXTRACTION_REGEX.description);
+
+    title = cleanText(titleMatch?.[1]);
+    description = cleanText(descMatch?.[1]);
   }
-  
-  const helmetMatch = content.match(EXTRACTION_REGEX.helmet);
-  if (!helmetMatch) return null;
-  
-  const helmetContent = helmetMatch[1];
-  const titleMatch = helmetContent.match(EXTRACTION_REGEX.title);
-  const descMatch = helmetContent.match(EXTRACTION_REGEX.description);
-  
-  const title = cleanText(titleMatch?.[1]);
-  const description = cleanText(descMatch?.[1]);
-  
+
+  // Fallback: search the whole cleaned content for title/meta or an <h1>
+  if (!title) {
+    const globalTitleMatch = cleanedContent.match(EXTRACTION_REGEX.title);
+    const h1Match = cleanedContent.match(EXTRACTION_REGEX.h1);
+    title = cleanText(globalTitleMatch?.[1] || h1Match?.[1]);
+  }
+
+  if (!description) {
+    const globalDescMatch = cleanedContent.match(EXTRACTION_REGEX.description);
+    description = cleanText(globalDescMatch?.[1]);
+  }
+
   const fileName = path.basename(filePath, path.extname(filePath));
-  const url = routes.length && routes.has(fileName) 
-    ? routes.get(fileName) 
+  const url = routes && typeof routes.has === 'function' && routes.has(fileName)
+    ? routes.get(fileName)
     : generateFallbackUrl(fileName);
-  
+
   return {
     url,
     title: title || 'Untitled Page',
@@ -120,11 +133,14 @@ function generateFallbackUrl(fileName) {
 }
 
 function generateLlmsTxt(pages) {
-  const sortedPages = pages.sort((a, b) => a.title.localeCompare(b.title));
-  const pageEntries = sortedPages.map(page => 
-    `- [${page.title}](${page.url}): ${page.description}`
-  ).join('\n');
-  
+  const validPages = (pages || []).filter((p) => p && p.title);
+  if (validPages.length === 0) return `## Pages\n`;
+
+  const sortedPages = validPages.sort((a, b) => a.title.localeCompare(b.title));
+  const pageEntries = sortedPages
+    .map((page) => `- [${page.title}](${page.url}): ${page.description}`)
+    .join('\n');
+
   return `## Pages\n${pageEntries}`;
 }
 
@@ -151,7 +167,8 @@ function main() {
   let pages = [];
   
   if (!fs.existsSync(pagesDir)) {
-    pages.push(processPageFile(appJsxPath, []));
+    const appPage = processPageFile(appJsxPath, []);
+    if (appPage) pages.push(appPage);
   } else {
     const routes = extractRoutes(appJsxPath);
     const reactFiles = findReactFiles(pagesDir);
@@ -159,13 +176,19 @@ function main() {
     pages = reactFiles
       .map(filePath => processPageFile(filePath, routes))
       .filter(Boolean);
-    
-    if (pages.length === 0) {
-      console.error('❌ No pages with Helmet components found!');
-      process.exit(1);
-    }
+  }
+  // If no pages were found from Helmet metadata, fall back to App.jsx
+  if (pages.length === 0) {
+    console.warn('⚠️ No pages with Helmet components found — falling back to App.jsx');
+    const fileName = path.basename(appJsxPath, path.extname(appJsxPath));
+    pages.push({
+      url: generateFallbackUrl(fileName),
+      title: 'Home',
+      description: 'Main application entry'
+    });
   }
 
+  console.log(`ℹ️  generate-llms: writing ${pages.length} page(s) to public/llms.txt`);
 
   const llmsTxtContent = generateLlmsTxt(pages);
   const outputPath = path.join(process.cwd(), 'public', 'llms.txt');

@@ -260,7 +260,18 @@ export default defineConfig({
 				'@babel/traverse',
 				'@babel/generator',
 				'@babel/types'
-			]
+			],
+			output: {
+				manualChunks(id) {
+					if (id.includes('node_modules')) {
+						if (id.includes('framer-motion')) return 'vendor_framer-motion';
+						if (id.includes('@supabase')) return 'vendor_supabase';
+						if (id.includes('lucide-react')) return 'vendor_icons';
+						if (id.includes('@radix-ui')) return 'vendor_radix';
+						return 'vendor';
+					}
+				}
+			}
 		}
 	}
 });

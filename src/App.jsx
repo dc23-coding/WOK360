@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSupabaseAuth } from "./context/SupabaseAuthContext";
 import HeroDoor from "./sections/HeroDoor";
 import LightHallway from "./sections/LightHallway";
@@ -10,16 +10,30 @@ import DarkPlayroom from "./sections/DarkPlayroom";
 export default function App() {
   const { user, signOut } = useSupabaseAuth();
 
-  // Admin keypad override
   const [adminUnlocked, setAdminUnlocked] = useState(false);
 
   const canEnter = !!user || adminUnlocked;
+
+  // 🔒 disable scroll until access granted
+  useEffect(() => {
+    if (canEnter) {
+      document.body.style.overflowY = "auto";
+    } else {
+      document.body.style.overflowY = "hidden";
+    }
+
+    return () => {
+      document.body.style.overflowY = "auto";
+    };
+  }, [canEnter]);
 
   const handleKeypadAccess = () => {
     setAdminUnlocked(true);
   };
 
   const handleEnterHouse = () => {
+    if (!canEnter) return;
+
     const el = document.getElementById("light-hallway");
     if (el) {
       el.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -28,7 +42,6 @@ export default function App() {
 
   return (
     <main className="w-screen min-h-screen bg-black text-white overflow-x-hidden">
-      {/* FRONT DOOR / HERO */}
       <HeroDoor
         isSignedIn={!!user}
         canEnter={canEnter}
@@ -36,18 +49,15 @@ export default function App() {
         onEnterHouse={handleEnterHouse}
       />
 
-      {/* LIGHT WING */}
       <section id="light-hallway">
         <LightHallway />
       </section>
       <LightBedroom />
 
-      {/* DARK WING */}
       <DarkHallway />
       <DarkBedroom />
       <DarkPlayroom />
 
-      {/* Tiny sign-out for now – you can move/style this later */}
       {user && (
         <button
           onClick={signOut}

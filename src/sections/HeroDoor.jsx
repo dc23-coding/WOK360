@@ -132,9 +132,8 @@ export default function HeroDoor({
 
                 <button
                   type="button"
-                  onClick={isSignedIn ? onEnterHouse : undefined}
-                  disabled={!isSignedIn}
-                  className="inline-flex items-center justify-center px-6 py-2.5 rounded-full bg-amber-400 text-black text-sm font-semibold shadow-[0_0_26px_rgba(252,211,77,0.95)] hover:bg-amber-300 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={onEnterHouse}
+                  className="inline-flex items-center justify-center px-6 py-2.5 rounded-full bg-amber-400 text-black text-sm font-semibold shadow-[0_0_26px_rgba(252,211,77,0.95)] hover:bg-amber-300 transition"
                 >
                   Enter House
                 </button>

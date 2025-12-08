@@ -1,9 +1,10 @@
-// src/sections/HeroDoor.jsx
-import { useState, useEffect } from "react";
-import { SignIn, SignUp } from "@clerk/clerk-react";
+import { useState, useEffect, useRef } from "react";
 import RoomSection from "../components/RoomSection";
+import { useSupabaseAuth } from "../context/SupabaseAuthContext";
+import SignInForm from "../components/SignInForm";
+import SignUpForm from "../components/SignUpForm";
 
-// NOTE: this is NOT a true secret; VITE_ vars are visible in frontend bundles.
+// NOTE: this is NOT a true secret; VITE_ vars are visible in the bundle.
 const ADMIN_CODE = import.meta.env.VITE_ADMIN_ACCESS_CODE || "3104";
 
 export default function HeroDoor({
@@ -17,11 +18,14 @@ export default function HeroDoor({
   const [authTab, setAuthTab] = useState("signin"); // 'signin' | 'signup'
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
+  const [showEnterConfirm, setShowEnterConfirm] = useState(false);
+  const modalRef = useRef(null);
 
-  // If user signs in successfully, close auth panel
+  // If user logs in via Supabase, close the auth tablet and show enter confirmation
   useEffect(() => {
     if (isSignedIn && showAuth) {
       setShowAuth(false);
+      setShowEnterConfirm(true);
     }
   }, [isSignedIn, showAuth]);
 
@@ -35,9 +39,8 @@ export default function HeroDoor({
 
     if (next.length === 4) {
       if (next === String(ADMIN_CODE)) {
-        // correct code
         setTimeout(() => {
-          onKeypadAccess(); // tell App "this device has access"
+          onKeypadAccess();
           setShowKeypad(false);
           setCode("");
         }, 120);
@@ -69,12 +72,45 @@ export default function HeroDoor({
           </p>
         </div>
 
+          {/* Enter confirmation after sign-in */}
+          {showEnterConfirm && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center">
+              <div className="absolute inset-0 bg-black/70" onClick={() => setShowEnterConfirm(false)} />
+              <div className="relative z-10 w-[300px] rounded-xl bg-black/95 border border-amber-300/80 p-5 shadow-[0_0_80px_rgba(252,211,77,0.9)] text-center">
+                <p className="text-amber-100 mb-4">Signed in — enter the house now?</p>
+                <div className="flex items-center justify-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowEnterConfirm(false);
+                      try {
+                        onEnterHouse();
+                      } catch (e) {
+                        /* ignore */
+                      }
+                    }}
+                    className="px-4 py-2 rounded-full bg-amber-400 text-black font-semibold"
+                  >
+                    Enter
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowEnterConfirm(false)}
+                    className="px-4 py-2 rounded-full border border-amber-200/40 text-amber-100"
+                  >
+                    Later
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
         {/* Glowing tablet on the door */}
         <div
           className={[
             "relative",
-            "w-[270px] md:w-[290px]",
-            "rounded-[30px]",
+            "w-[290px] md:w-[320px]",
+            "rounded-[32px]",
             "bg-black/92",
             "border border-amber-300/80",
             "shadow-[0_0_90px_rgba(252,211,77,0.9)]",
@@ -84,11 +120,10 @@ export default function HeroDoor({
             tabletIsZoomed ? "scale-105" : "scale-100",
           ].join(" ")}
         >
-          {/* soft glow overlay */}
-          <div className="pointer-events-none absolute inset-0 rounded-[30px] bg-gradient-to-b from-amber-50/8 via-transparent to-amber-200/18" />
+          <div className="pointer-events-none absolute inset-0 rounded-[32px] bg-gradient-to-b from-amber-50/8 via-transparent to-amber-200/18" />
 
           <div className="relative z-10 w-full">
-            {/* ---------------- 1. ACCESS GRANTED ---------------- */}
+            {/* ---------- 1. ACCESS GRANTED (ENTER HOUSE) ---------- */}
             {canEnter && !showKeypad && !showAuth && (
               <div className="flex flex-col items-center gap-3">
                 <p className="text-[10px] uppercase tracking-[0.3em] text-amber-300/80">
@@ -97,8 +132,9 @@ export default function HeroDoor({
 
                 <button
                   type="button"
-                  onClick={onEnterHouse}
-                  className="inline-flex items-center justify-center px-6 py-2.5 rounded-full bg-amber-400 text-black text-sm font-semibold shadow-[0_0_26px_rgba(252,211,77,0.95)] hover:bg-amber-300 transition"
+                  onClick={isSignedIn ? onEnterHouse : undefined}
+                  disabled={!isSignedIn}
+                  className="inline-flex items-center justify-center px-6 py-2.5 rounded-full bg-amber-400 text-black text-sm font-semibold shadow-[0_0_26px_rgba(252,211,77,0.95)] hover:bg-amber-300 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Enter House
                 </button>
@@ -117,7 +153,7 @@ export default function HeroDoor({
               </div>
             )}
 
-            {/* ---------------- 2. GUEST STATE (DEFAULT) ---------------- */}
+            {/* ---------- 2. GUEST STATE (DEFAULT) ---------- */}
             {!canEnter && !showKeypad && !showAuth && (
               <div className="flex flex-col items-center gap-4">
                 <p className="text-[10px] uppercase tracking-[0.3em] text-amber-300/80">
@@ -126,13 +162,16 @@ export default function HeroDoor({
 
                 <button
                   type="button"
-                  onClick={() => setShowAuth(true)}
+                  onClick={() => {
+                    setAuthTab("signin");
+                    setShowAuth(true);
+                  }}
                   className="inline-flex items-center justify-center px-5 py-2.5 rounded-full bg-amber-400 text-black text-sm font-semibold shadow-[0_0_24px_rgba(252,211,77,0.9)] hover:bg-amber-300 transition"
                 >
                   Sign in / Create account
                 </button>
 
-                <p className="mt-1 text-[10px] text-amber-100/65 max-w-[200px]">
+                <p className="mt-1 text-[10px] text-amber-100/65 max-w-[220px]">
                   Your account becomes your personal key to the house.
                 </p>
 
@@ -146,7 +185,7 @@ export default function HeroDoor({
               </div>
             )}
 
-            {/* ---------------- 3. KEYPAD STATE ---------------- */}
+            {/* ---------- 3. KEYPAD STATE ---------- */}
             {showKeypad && (
               <div className="flex flex-col items-center gap-4">
                 <div className="w-full flex justify-between items-center mb-1">
@@ -216,105 +255,61 @@ export default function HeroDoor({
               </div>
             )}
 
-            {/* ---------------- 4. INLINE CLERK AUTH ---------------- */}
+            {/* ---------- 4. SUPABASE AUTH (TABLET MODE) ---------- */}
             {showAuth && (
-              <div className="flex flex-col items-stretch gap-2 w-full mt-3">
-                <div className="w-full flex justify-between items-center mb-1">
-                  <p className="text-[10px] uppercase tracking-[0.3em] text-amber-300/80">
-                    Account access
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowAuth(false);
-                      setAuthTab("signin");
-                    }}
-                    className="text-[10px] text-amber-200/70 hover:text-amber-100/90"
-                  >
-                    Back
-                  </button>
-                </div>
+  <div className="flex flex-col items-stretch gap-2 w-full mt-3">
+    <div className="w-full flex justify-between items-center mb-1">
+      <p className="text-[10px] uppercase tracking-[0.3em] text-amber-300/80">
+        Account access
+      </p>
+      <button
+        type="button"
+        onClick={() => {
+          setShowAuth(false);
+          setAuthTab("signin");
+        }}
+        className="text-[10px] text-amber-200/70 hover:text-amber-100/90"
+      >
+        Back
+      </button>
+    </div>
 
-                {/* little tabs for Sign in / Create account */}
-                <div className="flex gap-2 justify-center mb-1">
-                  <button
-                    type="button"
-                    onClick={() => setAuthTab("signin")}
-                    className={[
-                      "px-3 py-1 rounded-full text-[11px]",
-                      authTab === "signin"
-                        ? "bg-amber-300 text-black"
-                        : "bg-transparent border border-amber-200/40 text-amber-100",
-                    ].join(" ")}
-                  >
-                    Sign in
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setAuthTab("signup")}
-                    className={[
-                      "px-3 py-1 rounded-full text-[11px]",
-                      authTab === "signup"
-                        ? "bg-amber-300 text-black"
-                        : "bg-transparent border border-amber-200/40 text-amber-100",
-                    ].join(" ")}
-                  >
-                    Create account
-                  </button>
-                </div>
+    <div className="flex gap-2 justify-center mb-1">
+      <button
+        type="button"
+        onClick={() => setAuthTab("signin")}
+        className={[
+          "px-3 py-1 rounded-full text-[11px]",
+          authTab === "signin"
+            ? "bg-amber-300 text-black"
+            : "bg-transparent border border-amber-200/40 text-amber-100",
+        ].join(" ")}
+      >
+        Sign in
+      </button>
+      <button
+        type="button"
+        onClick={() => setAuthTab("signup")}
+        className={[
+          "px-3 py-1 rounded-full text-[11px]",
+          authTab === "signup"
+            ? "bg-amber-300 text-black"
+            : "bg-transparent border border-amber-200/40 text-amber-100",
+        ].join(" ")}
+      >
+        Create account
+      </button>
+    </div>
 
-                {/* Scrollable area so Clerk's button never gets cut off */}
-                <div className="mt-2 max-h-72 w-full overflow-y-auto text-left">
-                  {authTab === "signin" ? (
-                    <SignIn
-                      routing="hash"
-                      path="/sign-in"
-                      signUpUrl="#/sign-up"
-                      redirectUrl="/#light-hallway"
-                      appearance={{
-                        elements: {
-                          rootBox: "w-full",
-                          card: "bg-transparent shadow-none border-none p-0",
-                          headerTitle: "text-amber-100 text-sm mb-1",
-                          headerSubtitle:
-                            "text-amber-200/70 text-[11px] mb-3",
-                          formFieldLabel: "text-amber-100 text-xs",
-                          formFieldInput:
-                            "bg-black/60 border border-amber-200/40 text-amber-50 text-xs",
-                          formButtonPrimary:
-                            "w-full mt-3 rounded-full bg-amber-400 text-black text-xs font-semibold " +
-                            "shadow-[0_0_24px_rgba(252,211,77,0.9)] hover:bg-amber-300 transition",
-                          footer: "mt-2 text-[10px] text-amber-100/70",
-                        },
-                      }}
-                    />
-                  ) : (
-                    <SignUp
-                      routing="hash"
-                      path="/sign-up"
-                      signInUrl="#/sign-in"
-                      redirectUrl="/#light-hallway"
-                      appearance={{
-                        elements: {
-                          rootBox: "w-full",
-                          card: "bg-transparent shadow-none border-none p-0",
-                          headerTitle: "text-amber-100 text-sm mb-1",
-                          headerSubtitle:
-                            "text-amber-200/70 text-[11px] mb-3",
-                          formFieldLabel: "text-amber-100 text-xs",
-                          formFieldInput:
-                            "bg-black/60 border border-amber-200/40 text-amber-50 text-xs",
-                          formButtonPrimary:
-                            "w-full mt-3 rounded-full bg-amber-400 text-black text-xs font-semibold " +
-                            "shadow-[0_0_24px_rgba(252,211,77,0.9)] hover:bg-amber-300 transition",
-                          footer: "mt-2 text-[10px] text-amber-100/70",
-                        },
-                      }}
-                    />
-                  )}
-                </div>
-              </div>
-            )}
+    <div className="mt-2 max-h-72 w-full overflow-y-auto text-left">
+      {authTab === "signin" ? (
+        <SignInForm onSuccess={() => setShowAuth(false)} />
+      ) : (
+        <SignUpForm onSuccess={() => setShowAuth(false)} />
+      )}
+    </div>
+  </div>
+)}
           </div>
         </div>
       </div>

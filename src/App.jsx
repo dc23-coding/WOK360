@@ -1,9 +1,10 @@
 import { useState, useEffect, Suspense, lazy } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { useSupabaseAuth } from "./context/SupabaseAuthContext";
 
 import HeroDoor from "./sections/HeroDoor";
 
-// Lazy-load large sections to reduce initial bundle size
+// Lazy-loaded sections
 const LightHallway = lazy(() => import("./sections/LightHallway"));
 const LightBedroom = lazy(() => import("./sections/LightBedroom"));
 const LightStudio = lazy(() => import("./sections/LightStudio"));
@@ -15,13 +16,32 @@ const DarkPlayroom = lazy(() => import("./sections/DarkPlayroom"));
 export default function App() {
   const { user, signOut } = useSupabaseAuth();
 
-  // Premium logic (adjust based on your Supabase metadata)
+  // Premium logic: adjust when you wire actual Supabase metadata
   const isPremium = user?.app_metadata?.premium === true;
 
   const [adminUnlocked, setAdminUnlocked] = useState(false);
-  const [mode, setMode] = useState("light"); // "light" | "dark"
+
+  // Persisted mode: read from localStorage on first render
+  const [mode, setMode] = useState(() => {
+    if (typeof window === "undefined") return "light";
+    const stored = window.localStorage.getItem("wok360_mode");
+    return stored === "dark" ? "dark" : "light";
+  }); // "light" | "dark"
+
+  const [isTransitioningMode, setIsTransitioningMode] = useState(false);
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
 
   const canEnter = !!user || adminUnlocked;
+  const canAccessDark = isPremium || adminUnlocked;
+
+  // ---------------------------------------------------------------------------
+  // Persist mode to localStorage
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("wok360_mode", mode);
+    }
+  }, [mode]);
 
   // ---------------------------------------------------------------------------
   // Disable scroll until access is granted
@@ -34,54 +54,58 @@ export default function App() {
   }, [canEnter]);
 
   // ---------------------------------------------------------------------------
-  // Toggle light/dark mode — block Night Wing for non-premium users
+  // Global mode toggle with premium gate & door animation
   // ---------------------------------------------------------------------------
-  const toggleMode = () => {
-    if (!isPremium && mode === "light") {
-      return; // non-premium cannot enter dark mode
+  const handleToggleMode = () => {
+    const nextMode = mode === "light" ? "dark" : "light";
+
+    // If going INTO dark and user is not allowed → show premium modal, don't switch
+    if (nextMode === "dark" && !canAccessDark) {
+      setShowPremiumModal(true);
+      return;
     }
-    setMode((m) => (m === "light" ? "dark" : "light"));
+
+    // Start door transition + switch mode
+    setIsTransitioningMode(true);
+    setMode(nextMode);
   };
 
-  // ---------------------------------------------------------------------------
-  // Smooth auto-scroll when mode changes (requestAnimationFrame ensures DOM ready)
-  // ---------------------------------------------------------------------------
+  // End transition after animation duration
   useEffect(() => {
-    if (mode === "light") {
-      requestAnimationFrame(() => {
-        const el = document.getElementById("light-hallway");
-        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-      });
-    }
-
-    if (mode === "dark" && isPremium) {
-      requestAnimationFrame(() => {
-        const el = document.getElementById("dark-hallway");
-        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-      });
-    }
-  }, [mode, isPremium]);
+    if (!isTransitioningMode) return;
+    const t = setTimeout(() => setIsTransitioningMode(false), 900); // match animation timing
+    return () => clearTimeout(t);
+  }, [isTransitioningMode]);
 
   // ---------------------------------------------------------------------------
-  // Admin keypad access
+  // NO auto-scroll on mode change — let user stay where they are
+  // Only handleEnterHouse scrolls when first entering the house
+  // ---------------------------------------------------------------------------
+
+  // ---------------------------------------------------------------------------
+  // Admin keypad unlock
   // ---------------------------------------------------------------------------
   const handleKeypadAccess = () => {
     setAdminUnlocked(true);
   };
 
   // ---------------------------------------------------------------------------
-  // Scroll into house after entering
+  // Enter house → scroll to Light Hallway
   // ---------------------------------------------------------------------------
   const handleEnterHouse = () => {
     if (!canEnter) return;
     const el = document.getElementById("light-hallway");
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   return (
-    <main className="w-screen min-h-screen bg-black text-white overflow-x-hidden">
+    <main
+  className="
+    w-screen min-h-screen bg-black text-white overflow-x-hidden
+    snap-y snap-mandatory overflow-y-scroll
+  "
+>
+
 
       {/* ------------------------------- FRONT DOOR ------------------------------- */}
       <HeroDoor
@@ -92,43 +116,123 @@ export default function App() {
       />
 
       {/* ---------------------------------------------------------------------------
-          LIGHT WING — Shown when mode === "light"
-          Everyone can access the Day Wing.
+          LIGHT WING (Default)
       --------------------------------------------------------------------------- */}
       {mode === "light" && (
-        <Suspense fallback={<div />}> 
+        <Suspense fallback={<div />}>
           <section id="light-hallway">
-            <LightHallway mode={mode} onToggleMode={toggleMode} />
+            <LightHallway mode={mode} onToggleMode={handleToggleMode} />
           </section>
 
-          <LightBedroom onToggleMode={toggleMode} />
-
+          <LightBedroom onToggleMode={handleToggleMode} />
           <LightStudio />
         </Suspense>
       )}
 
       {/* ---------------------------------------------------------------------------
-          DARK WING — Shown only when:
-            1) mode === "dark"
-            2) user is premium
-          Otherwise Night Wing sections never load.
+          DARK WING — requires premium or admin
+          NOTE: DarkHallway already contains id="dark-hallway" internally.
       --------------------------------------------------------------------------- */}
-      {mode === "dark" && isPremium && (
+      {mode === "dark" && canAccessDark && (
         <Suspense fallback={<div />}>
-          {/* ADD id for scroll target (required) */}
-          <DarkHallway onToggleMode={toggleMode} />
-
-          <DarkBedroom onToggleMode={toggleMode} />
-
+          <DarkHallway onToggleMode={handleToggleMode} />
+          <DarkBedroom onToggleMode={handleToggleMode} />
           <DarkPlayroom />
         </Suspense>
       )}
 
-      {/* Sign-out button */}
+      {/* --------------------------- PREMIUM MODAL --------------------------- */}
+      <AnimatePresence>
+        {showPremiumModal && (
+          <motion.div
+            className="fixed inset-0 z-[70] flex items-center justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <div
+              className="absolute inset-0 bg-black/70"
+              onClick={() => setShowPremiumModal(false)}
+            />
+            <motion.div
+              className="relative z-10 w-[320px] max-w-sm rounded-2xl bg-black/90 border border-amber-300/70 px-6 py-5 shadow-[0_0_60px_rgba(252,211,77,0.7)]"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+            >
+              <p className="text-[10px] uppercase tracking-[0.3em] text-amber-300/80 mb-2">
+                Night Wing Locked
+              </p>
+              <h2 className="text-lg font-semibold text-amber-50 mb-2">
+                Premium Access Required
+              </h2>
+              <p className="text-sm text-amber-100/80 mb-4">
+                The Night Wing holds private rooms, live sessions, and exclusive
+                content. Unlock premium access to step through this door.
+              </p>
+              <div className="flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowPremiumModal(false)}
+                  className="text-xs px-3 py-1.5 rounded-full border border-amber-200/50 text-amber-100 hover:bg-amber-100/10"
+                >
+                  Stay in Day Wing
+                </button>
+                {/* Hook this up to your actual checkout later */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    // placeholder for future: route to pricing / checkout
+                    setShowPremiumModal(false);
+                  }}
+                  className="text-xs px-4 py-1.5 rounded-full bg-amber-300 text-black font-semibold hover:bg-amber-200"
+                >
+                  Unlock Premium
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ------------------------- DOOR TRANSITION OVERLAY ------------------------- */}
+      <AnimatePresence>
+        {isTransitioningMode && (
+          <motion.div
+            className="fixed inset-0 z-[60] pointer-events-none flex items-center justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.35 }}
+          >
+            {/* Two sliding panels like a door closing/opening */}
+            <motion.div
+              className="absolute inset-y-0 left-0 w-1/2 bg-black/95 border-r border-amber-300/40"
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ duration: 0.45, ease: "easeInOut" }}
+            />
+            <motion.div
+              className="absolute inset-y-0 right-0 w-1/2 bg-black/95 border-l border-amber-300/40"
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ duration: 0.45, ease: "easeInOut" }}
+            />
+
+            <div className="relative z-10 text-center text-amber-100 text-xs tracking-[0.3em] uppercase">
+              Switching to {mode === "dark" ? "Night Wing" : "Day Wing"}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Sign out button */}
       {user && (
         <button
           onClick={signOut}
-          className="fixed top-4 right-4 text-xs text-amber-200/80 hover:text-amber-50"
+          className="fixed top-4 right-4 text-xs text-amber-200/80 hover:text-amber-50 z-[80]"
         >
           Sign out
         </button>

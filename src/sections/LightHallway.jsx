@@ -6,9 +6,9 @@ export default function LightHallway({ mode, onToggleMode }) {
   const [activeNav, setActiveNav] = useState(0);
 
   const navItems = [
-    { label: "Calm Bedroom", href: "#light-bedroom" },
-    { label: "Day Wing Interviews", href: "#" },
-    { label: "Studio Sessions", href: "#" },
+    { label: "Hallway Navi", href: "#light-bedroom" },
+    { label: "Visitors", href: "#" },
+    { label: "Live Streams", href: "#" },
   ];
 
   return (
@@ -28,7 +28,7 @@ export default function LightHallway({ mode, onToggleMode }) {
               Day Wing
             </p>
             <h2 className="mt-2 text-2xl md:text-3xl font-semibold text-amber-900">
-              Hallway of Stories
+              Story Hall
             </h2>
             <ul className="mt-3 space-y-1 text-sm md:text-base text-amber-800/90">
               {navItems.map((item, index) => (

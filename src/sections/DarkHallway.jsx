@@ -6,8 +6,8 @@ export default function DarkHallway({ mode, onToggleMode }) {
   const [activeNav, setActiveNav] = useState(0);
 
   const navItems = [
-    { label: "Private Bedroom", href: "#dark-bedroom" },
-    { label: "Live Night Sessions", href: "#" },
+    { label: "Dark Navi", href: "#dark-bedroom" },
+    { label: "Private Bedroom", href: "#" },
     { label: "Hidden Doors (Coming Soon)", href: "#" },
   ];
 
@@ -23,7 +23,7 @@ export default function DarkHallway({ mode, onToggleMode }) {
             Night Wing
           </p>
           <h2 className="text-2xl md:text-3xl font-semibold">
-            Hallway of Stories
+            Exclusive Stories
           </h2>
           <ul className="space-y-2 text-sm md:text-base">
             {navItems.map((item, index) => (

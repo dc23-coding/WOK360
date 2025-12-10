@@ -20,6 +20,7 @@ export default function App() {
   const isPremium = user?.app_metadata?.premium === true;
 
   const [adminUnlocked, setAdminUnlocked] = useState(false);
+  const [hasEnteredHouse, setHasEnteredHouse] = useState(false);
 
   // Persisted mode: read from localStorage on first render
   const [mode, setMode] = useState(() => {
@@ -90,12 +91,11 @@ export default function App() {
   };
 
   // ---------------------------------------------------------------------------
-  // Enter house → scroll to Light Hallway
+  // Enter house → close door modal and show hallway
   // ---------------------------------------------------------------------------
   const handleEnterHouse = () => {
     if (!canEnter) return;
-    const el = document.getElementById("light-hallway");
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    setHasEnteredHouse(true);
   };
 
   return (
@@ -105,40 +105,54 @@ export default function App() {
     snap-y snap-mandatory overflow-y-scroll
   "
 >
+      {/* ------------------------------- FRONT DOOR (Fixed Modal) ------------------------------- */}
+      <AnimatePresence>
+        {!hasEnteredHouse && (
+          <motion.div
+            className="fixed inset-0 z-[100] bg-black"
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <HeroDoor
+              isSignedIn={!!user}
+              canEnter={canEnter}
+              onKeypadAccess={handleKeypadAccess}
+              onEnterHouse={handleEnterHouse}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
+      {/* Only show hallways/rooms after user enters */}
+      {hasEnteredHouse && (
+        <>
+          {/* ---------------------------------------------------------------------------
+              LIGHT WING (Default)
+          --------------------------------------------------------------------------- */}
+          {mode === "light" && (
+            <Suspense fallback={<div />}>
+              <section id="light-hallway">
+                <LightHallway mode={mode} onToggleMode={handleToggleMode} />
+              </section>
 
-      {/* ------------------------------- FRONT DOOR ------------------------------- */}
-      <HeroDoor
-        isSignedIn={!!user}
-        canEnter={canEnter}
-        onKeypadAccess={handleKeypadAccess}
-        onEnterHouse={handleEnterHouse}
-      />
+              <LightBedroom onToggleMode={handleToggleMode} />
+              <LightStudio />
+            </Suspense>
+          )}
 
-      {/* ---------------------------------------------------------------------------
-          LIGHT WING (Default)
-      --------------------------------------------------------------------------- */}
-      {mode === "light" && (
-        <Suspense fallback={<div />}>
-          <section id="light-hallway">
-            <LightHallway mode={mode} onToggleMode={handleToggleMode} />
-          </section>
-
-          <LightBedroom onToggleMode={handleToggleMode} />
-          <LightStudio />
-        </Suspense>
-      )}
-
-      {/* ---------------------------------------------------------------------------
-          DARK WING — requires premium or admin
-          NOTE: DarkHallway already contains id="dark-hallway" internally.
-      --------------------------------------------------------------------------- */}
-      {mode === "dark" && canAccessDark && (
-        <Suspense fallback={<div />}>
-          <DarkHallway onToggleMode={handleToggleMode} />
-          <DarkBedroom onToggleMode={handleToggleMode} />
-          <DarkPlayroom />
-        </Suspense>
+          {/* ---------------------------------------------------------------------------
+              DARK WING — requires premium or admin
+              NOTE: DarkHallway already contains id="dark-hallway" internally.
+          --------------------------------------------------------------------------- */}
+          {mode === "dark" && canAccessDark && (
+            <Suspense fallback={<div />}>
+              <DarkHallway mode={mode} onToggleMode={handleToggleMode} />
+              <DarkBedroom onToggleMode={handleToggleMode} />
+              <DarkPlayroom />
+            </Suspense>
+          )}
+        </>
       )}
 
       {/* --------------------------- PREMIUM MODAL --------------------------- */}

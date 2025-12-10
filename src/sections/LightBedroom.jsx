@@ -5,23 +5,6 @@ export default function LightBedroom({ onToggleMode }) {
   return (
     <RoomSection bg="/Bedroon_Light.png" className="bg-white">
       <div className="relative w-full h-full flex items-center justify-center text-center text-amber-900 px-4">
-        {/* Global sensor toggle (same place as dark) */}
-        <button
-          type="button"
-          onClick={onToggleMode}
-          aria-label="Switch to Night Wing"
-          className="
-            absolute top-6 right-6
-            w-5 h-5 md:w-7 md:h-7
-            rounded-full
-            bg-amber-300/40
-            hover:bg-amber-400/70
-            border border-amber-300/70
-            backdrop-blur
-            transition
-          "
-        />
-
         {/* Main day card */}
         <div className="bg-amber-50/90 rounded-2xl px-4 py-3 md:px-8 md:py-6 shadow-lg backdrop-blur">
           <p className="text-[10px] md:text-xs uppercase tracking-[0.3em] text-amber-500">
@@ -35,7 +18,7 @@ export default function LightBedroom({ onToggleMode }) {
           </p>
         </div>
 
-        {/* Optional: tap-lamp hotspot as second toggle */}
+        {/* Optional: tap-lamp hotspot as toggle */}
         <button
           type="button"
           onClick={onToggleMode}
@@ -51,9 +34,6 @@ export default function LightBedroom({ onToggleMode }) {
             transition
           "
         />
-        <div className="absolute bottom-4 right-4 text-[10px] md:text-xs text-amber-700/80">
-          Tap the lamp to switch to Night Wing
-        </div>
       </div>
     </RoomSection>
   );

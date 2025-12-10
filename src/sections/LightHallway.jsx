@@ -1,7 +1,16 @@
 // src/sections/LightHallway.jsx
+import { useState } from "react";
 import RoomSection from "../components/RoomSection";
 
 export default function LightHallway({ mode, onToggleMode }) {
+  const [activeNav, setActiveNav] = useState(0);
+
+  const navItems = [
+    { label: "Calm Bedroom", href: "#light-bedroom" },
+    { label: "Day Wing Interviews", href: "#" },
+    { label: "Studio Sessions", href: "#" },
+  ];
+
   return (
     <RoomSection bg="/Hallway_Light.png" className="bg-white">
       <div className="relative w-full h-full flex items-center justify-center">
@@ -22,9 +31,24 @@ export default function LightHallway({ mode, onToggleMode }) {
               Hallway of Stories
             </h2>
             <ul className="mt-3 space-y-1 text-sm md:text-base text-amber-800/90">
-              <li>▶ Calm Bedroom</li>
-              <li>Day Wing Interviews</li>
-              <li>Studio Sessions</li>
+              {navItems.map((item, index) => (
+                <li
+                  key={index}
+                  className={`cursor-pointer transition-all ${
+                    activeNav === index
+                      ? "opacity-100 font-semibold"
+                      : "opacity-60 hover:opacity-80"
+                  }`}
+                  onClick={() => {
+                    setActiveNav(index);
+                    if (item.href !== "#") {
+                      document.getElementById(item.href.slice(1))?.scrollIntoView({ behavior: "smooth" });
+                    }
+                  }}
+                >
+                  {activeNav === index ? "▶" : " "} {item.label}
+                </li>
+              ))}
             </ul>
             <p className="mt-4 text-[11px] md:text-xs text-amber-700/90">
               Regular access rooms live here. Switch to Night Wing for exclusive

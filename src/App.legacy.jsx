@@ -8,6 +8,10 @@ import HeroDoor from "./sections/HeroDoor";
 const LightHallway = lazy(() => import("./sections/LightHallway"));
 const LightBedroom = lazy(() => import("./sections/LightBedroom"));
 const LightStudio = lazy(() => import("./sections/LightStudio"));
+const LightMusicRoom = lazy(() => import("./sections/LightMusicRoom"));
+const LightPhotoGallery = lazy(() => import("./sections/LightPhotoGallery"));
+const LightMerchShop = lazy(() => import("./sections/LightMerchShop"));
+const LightAskJeeves = lazy(() => import("./sections/LightAskJeeves"));
 
 const DarkHallway = lazy(() => import("./sections/DarkHallway"));
 const DarkBedroom = lazy(() => import("./sections/DarkBedroom"));
@@ -21,6 +25,7 @@ export default function App() {
 
   const [adminUnlocked, setAdminUnlocked] = useState(false);
   const [hasEnteredHouse, setHasEnteredHouse] = useState(false);
+  const [activeRoom, setActiveRoom] = useState(null); // Track which room to show in modal
 
   // Persisted mode: read from localStorage on first render
   const [mode, setMode] = useState(() => {
@@ -133,10 +138,13 @@ export default function App() {
           {mode === "light" && (
             <Suspense fallback={<div />}>
               <section id="light-hallway">
-                <LightHallway mode={mode} onToggleMode={handleToggleMode} />
+                <LightHallway mode={mode} onToggleMode={handleToggleMode} onNavigate={setActiveRoom} />
               </section>
 
-              <LightBedroom onToggleMode={handleToggleMode} />
+              <section id="light-bedroom">
+                <LightBedroom onToggleMode={handleToggleMode} />
+              </section>
+
               <LightStudio />
             </Suspense>
           )}
@@ -147,13 +155,55 @@ export default function App() {
           --------------------------------------------------------------------------- */}
           {mode === "dark" && canAccessDark && (
             <Suspense fallback={<div />}>
-              <DarkHallway mode={mode} onToggleMode={handleToggleMode} />
-              <DarkBedroom onToggleMode={handleToggleMode} />
-              <DarkPlayroom />
+              <DarkHallway mode={mode} onToggleMode={handleToggleMode} onNavigate={setActiveRoom} />
+              
+              <section id="dark-bedroom">
+                <DarkBedroom onToggleMode={handleToggleMode} />
+              </section>
+
+              <section id="dark-playroom">
+                <DarkPlayroom />
+              </section>
             </Suspense>
           )}
         </>
       )}
+
+      {/* --------------------------- ROOM NAVIGATION MODAL --------------------------- */}
+      <AnimatePresence>
+        {activeRoom && (
+          <motion.div
+            className="fixed inset-0 z-[70] flex items-center justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <div
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+              onClick={() => setActiveRoom(null)}
+            />
+            <motion.div
+              className="relative z-10 w-full h-full max-w-7xl max-h-[90vh] rounded-2xl overflow-hidden shadow-2xl"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+            >
+              <button
+                onClick={() => setActiveRoom(null)}
+                className="absolute top-4 right-4 z-[80] w-10 h-10 rounded-full bg-black/60 border border-white/30 text-white hover:bg-black/80 flex items-center justify-center text-xl"
+              >
+                ×
+              </button>
+              <Suspense fallback={<div className="w-full h-full bg-black flex items-center justify-center text-white">Loading...</div>}>
+                {activeRoom === "music-room" && <LightMusicRoom onToggleMode={handleToggleMode} />}
+                {activeRoom === "photo-gallery" && <LightPhotoGallery onToggleMode={handleToggleMode} />}
+                {activeRoom === "merch-shop" && <LightMerchShop onToggleMode={handleToggleMode} />}
+                {activeRoom === "ask-cle" && <LightAskJeeves onToggleMode={handleToggleMode} />}
+              </Suspense>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* --------------------------- PREMIUM MODAL --------------------------- */}
       <AnimatePresence>

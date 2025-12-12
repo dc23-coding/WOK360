@@ -64,7 +64,7 @@ export default function HeroDoor({
         {/* Title & subtitle */}
         <div className="mb-10">
           <h1 className="text-3xl md:text-5xl font-semibold tracking-tight">
-            World of Karma 360
+            The Kazmo Mansion
           </h1>
           <p className="mt-4 max-w-xl mx-auto text-sm md:text-base text-amber-100/80">
             Step through the door into a living house of stories, live feeds,

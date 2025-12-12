@@ -2,13 +2,14 @@
 import { useState } from "react";
 import RoomSection from "../components/RoomSection";
 
-export default function DarkHallway({ mode, onToggleMode }) {
+export default function DarkHallway({ mode, onToggleMode, onNavigate }) {
   const [activeNav, setActiveNav] = useState(0);
 
   const navItems = [
-    { label: "Dark Navi", href: "#dark-bedroom" },
-    { label: "Private Bedroom", href: "#" },
-    { label: "Hidden Doors (Coming Soon)", href: "#" },
+    { label: "Private Bedroom", action: "scroll", target: "dark-bedroom" },
+    { label: "Exclusive Studio", action: "scroll", target: "dark-playroom" },
+    { label: "Ask Cle AI", action: "none", info: "Available in all dark rooms" },
+    { label: "Premium Features", action: "none", info: "Coming Soon" },
   ];
 
   return (
@@ -36,12 +37,13 @@ export default function DarkHallway({ mode, onToggleMode }) {
                 }`}
                 onClick={() => {
                   setActiveNav(index);
-                  if (item.href !== "#") {
-                    document.getElementById(item.href.slice(1))?.scrollIntoView({ behavior: "smooth" });
+                  if (item.action === "scroll" && item.target) {
+                    document.getElementById(item.target)?.scrollIntoView({ behavior: "smooth" });
                   }
                 }}
               >
                 {activeNav === index ? "▶" : " "} {item.label}
+                {item.info && <span className="text-[10px] text-cyan-400/60 ml-2">({item.info})</span>}
               </li>
             ))}
           </ul>

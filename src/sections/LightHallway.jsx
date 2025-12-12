@@ -2,13 +2,16 @@
 import { useState } from "react";
 import RoomSection from "../components/RoomSection";
 
-export default function LightHallway({ mode, onToggleMode }) {
+export default function LightHallway({ mode, onToggleMode, onNavigate }) {
   const [activeNav, setActiveNav] = useState(0);
 
   const navItems = [
-    { label: "Hallway Navi", href: "#light-bedroom" },
-    { label: "Visitors", href: "#" },
-    { label: "Live Streams", href: "#" },
+    { label: "Calm Bedroom", action: "scroll", target: "light-bedroom" },
+    { label: "Music Room", action: "modal", target: "music-room" },
+    { label: "Photo Gallery", action: "modal", target: "photo-gallery" },
+    { label: "Merch Shop", action: "modal", target: "merch-shop" },
+    { label: "Ask Cle", action: "modal", target: "ask-cle" },
+    { label: "Coming Soon", action: "none", target: null },
   ];
 
   return (
@@ -28,9 +31,9 @@ export default function LightHallway({ mode, onToggleMode }) {
               Day Wing
             </p>
             <h2 className="mt-2 text-2xl md:text-3xl font-semibold text-amber-900">
-              Story Hall
+              Welcome Home
             </h2>
-            <ul className="mt-3 space-y-1 text-sm md:text-base text-amber-800/90">
+            <ul className="mt-3 space-y-2 text-sm md:text-base text-amber-800/90">
               {navItems.map((item, index) => (
                 <li
                   key={index}
@@ -41,8 +44,10 @@ export default function LightHallway({ mode, onToggleMode }) {
                   }`}
                   onClick={() => {
                     setActiveNav(index);
-                    if (item.href !== "#") {
-                      document.getElementById(item.href.slice(1))?.scrollIntoView({ behavior: "smooth" });
+                    if (item.action === "scroll" && item.target) {
+                      document.getElementById(item.target)?.scrollIntoView({ behavior: "smooth" });
+                    } else if (item.action === "modal" && item.target) {
+                      onNavigate(item.target);
                     }
                   }}
                 >
@@ -51,8 +56,7 @@ export default function LightHallway({ mode, onToggleMode }) {
               ))}
             </ul>
             <p className="mt-4 text-[11px] md:text-xs text-amber-700/90">
-              Regular access rooms live here. Switch to Night Wing for exclusive
-              content and live sessions.
+              Explore stories, music, gallery, shop, and more. Switch to Night Wing for exclusive content and live sessions.
             </p>
           </div>
         </div>

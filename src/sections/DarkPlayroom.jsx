@@ -1,8 +1,10 @@
 import RoomSection from "../components/RoomSection";
 import AskCleAssistant from "../components/AskCleAssistant";
+import ViewingClub from "../components/ViewingClub";
 import { useEffect, useRef, useState } from "react";
 
 export default function DarkPlayroom() {
+  const [activeMode, setActiveMode] = useState("video"); // "video" | "club"
   const defaultVideo = "https://www.w3schools.com/html/mov_bbb.mp4";
   const [videoUrl, setVideoUrl] = useState(defaultVideo);
   const videoRef = useRef(null);
@@ -92,6 +94,42 @@ export default function DarkPlayroom() {
       <AskCleAssistant />
       <div className="relative w-full h-full flex flex-col items-center justify-center text-cyan-50 px-4 py-8">
         
+        {/* MODE TOGGLE */}
+        <div className="absolute top-6 left-1/2 -translate-x-1/2 z-20 inline-flex items-center rounded-full bg-slate-900/80 backdrop-blur px-1 py-1 border border-cyan-400/50">
+          <button
+            type="button"
+            onClick={() => setActiveMode("video")}
+            className={`px-4 py-2 rounded-full text-sm transition ${
+              activeMode === "video"
+                ? "bg-cyan-500 text-white shadow-lg"
+                : "text-cyan-300 hover:text-white"
+            }`}
+          >
+            🎬 Video Studio
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveMode("club")}
+            className={`px-4 py-2 rounded-full text-sm transition ${
+              activeMode === "club"
+                ? "bg-cyan-500 text-white shadow-lg"
+                : "text-cyan-300 hover:text-white"
+            }`}
+          >
+            🎭 Private Lounge
+          </button>
+        </div>
+
+        {/* VIEWING CLUB MODE */}
+        {activeMode === "club" && (
+          <div className="w-full h-full max-w-7xl">
+            <ViewingClub variant="dark" />
+          </div>
+        )}
+
+        {/* VIDEO STUDIO MODE */}
+        {activeMode === "video" && (
+          <>
         {/* VIDEO CONTAINER WITH NEON BOTTOM FRAME */}
         <div
           ref={playerContainerRef}
@@ -256,6 +294,8 @@ export default function DarkPlayroom() {
             <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-1/2 bg-gradient-to-b from-cyan-400/80 to-transparent blur-[2px]" />
           </div>
         </div>
+        </>
+        )}
 
         {/* OPTIONAL: LANES OR ADDITIONAL CONTENT BELOW (REMOVED FOR NOW) */}
         {/* If you want to keep the lanes below, add them here as a separate section */}

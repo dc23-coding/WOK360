@@ -6,9 +6,55 @@ export default function MapGlobe({ regions, accessibleRegions, onRegionClick }) 
   const [hoveredRegion, setHoveredRegion] = useState(null);
 
   return (
-    <div className="relative w-full h-[600px] flex items-center justify-center">
-      {/* Globe Container */}
-      <div className="relative w-full max-w-2xl aspect-square">
+    <div className="relative w-full h-[600px] flex items-center justify-center overflow-hidden">
+      {/* Starfield Background */}
+      <div className="absolute inset-0 overflow-hidden">
+        {/* Stars */}
+        {Array.from({ length: 100 }).map((_, i) => {
+          const size = Math.random() * 2 + 1;
+          const x = Math.random() * 100;
+          const y = Math.random() * 100;
+          const delay = Math.random() * 3;
+          const duration = Math.random() * 2 + 2;
+          
+          return (
+            <motion.div
+              key={i}
+              className="absolute rounded-full bg-white"
+              style={{
+                width: `${size}px`,
+                height: `${size}px`,
+                left: `${x}%`,
+                top: `${y}%`
+              }}
+              animate={{
+                opacity: [0.2, 1, 0.2],
+                scale: [1, 1.5, 1]
+              }}
+              transition={{
+                duration,
+                delay,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            />
+          );
+        })}
+      </div>
+
+      {/* Globe Container with Scaling Animation */}
+      <motion.div 
+        className="relative w-full max-w-2xl aspect-square z-10"
+        animate={{
+          scale: [1, 1.05, 1],
+          rotate: [0, 2, 0, -2, 0]
+        }}
+        transition={{
+          duration: 8,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+      >
         {/* Globe Circle */}
         <div className="absolute inset-0 rounded-full bg-gradient-to-br from-slate-800 via-slate-900 to-black border-2 border-cyan-400/30 shadow-[0_0_80px_rgba(34,211,238,0.3)]">
           {/* Grid Lines Effect */}
@@ -153,10 +199,10 @@ export default function MapGlobe({ regions, accessibleRegions, onRegionClick }) 
             </p>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Legend */}
-      <div className="absolute bottom-0 right-0 bg-slate-900/90 backdrop-blur border border-slate-700 rounded-xl p-4 text-xs">
+      <div className="absolute bottom-0 right-0 bg-slate-900/90 backdrop-blur border border-slate-700 rounded-xl p-4 text-xs z-20">
         <p className="text-slate-400 mb-2 font-semibold">Legend:</p>
         <div className="space-y-1">
           <div className="flex items-center gap-2">

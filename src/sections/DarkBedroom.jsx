@@ -83,7 +83,7 @@ export default function DarkBedroom({ onToggleMode }) {
 
         {/* CINEMATIC PLAYER + PLAYLIST – stacked to keep tabs under the screen */}
         <div
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-[82%] w-[62%] max-w-5xl flex flex-col items-center gap-4"
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-[55%] w-[62%] max-w-5xl flex flex-col items-center gap-4"
         >
           <div className="relative w-full rounded-2xl border border-cyan-300/60 shadow-[0_0_60px_rgba(34,211,238,0.7)] overflow-hidden bg-gradient-to-b from-cyan-950/70 via-black to-black">
             {/* Glow ring */}

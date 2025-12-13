@@ -6,86 +6,113 @@ export const regions = [
     id: "kazmo-mansion",
     name: "Kazmo Mansion",
     district: "Kazmo District",
-    description: "The legendary mansion where stories unfold through light and shadow. Explore exclusive content, live sessions, and immersive media experiences.",
+    owner: "Professor Cle",
+    description: "Professor Cleshay's legendary mansion. Follow exclusive live sessions, crypto market insights, and learning centers. Stay connected with Professor Cle's latest content and educational experiences.",
     status: "active",
-    requiredAccess: "basic", // "basic" | "premium"
+    requiredAccess: "basic",
     thumbnail: "/mansionThumb.png",
-    coordinates: { lat: 34.05, lng: -118.25 }, // Globe position (LA coords as example)
+    coordinates: { lat: 34.05, lng: -118.25 },
     features: [
+      "Live Sessions with Professor Cle",
+      "Crypto Market Learning Centers",
+      "Exclusive Educational Content",
       "Interactive Story Panels",
       "Day & Night Wings",
-      "Live Music Sessions",
-      "Photo Gallery",
-      "Merch Shop",
       "Ask CLE AI Assistant"
     ],
     entryPoint: "/world/kazmo-mansion"
   },
   {
-    id: "studio-belt",
-    name: "Studio Belt",
-    district: "Creative Quarter",
-    description: "A sprawling complex of recording studios, production rooms, and collaboration spaces. Where music and video come to life.",
+    id: "shadow-market",
+    name: "Shadow Market",
+    district: "Exchange District",
+    description: "The decentralized marketplace for crypto trading, real estate listings, and real-world assets. Trade on the DEX, invest in tokenized properties, and access exclusive RWA opportunities.",
     status: "coming-soon",
+    requiredAccess: "basic",
+    thumbnail: "/shadowMarketThumb.png",
+    coordinates: { lat: 35.68, lng: 139.65 },
+    features: [
+      "Crypto DEX (Decentralized Exchange)",
+      "Real Estate Listings & Tokenization",
+      "Real-World Assets (RWA) Marketplace",
+      "Property Investment Opportunities",
+      "Secure Blockchain Transactions",
+      "NFT & Digital Asset Trading"
+    ],
+    entryPoint: "/world/shadow-market"
+  },
+  {
+    id: "club-hollywood",
+    name: "Club Hollywood",
+    district: "Entertainment District",
+    description: "Cinema-style presence lounge where you watch content together. Join live sessions with Professor Cle and the community. Free for all visitors.",
+    status: "active",
+    requiredAccess: "basic",
+    thumbnail: "/clubHollywoodThumb.png",
+    coordinates: { lat: 34.10, lng: -118.35 },
+    features: [
+      "Live Content Viewing",
+      "Cinema-Style Presence",
+      "Real-Time Reactions",
+      "Community Chat",
+      "Anonymous Metrics",
+      "Free Access for All"
+    ],
+    entryPoint: "/world/club-hollywood"
+  },
+  {
+    id: "studio-belt",
+    name: "Multiverse Studios",
+    district: "Creative Quarter",
+    description: "A sprawling complex of recording studios, production rooms, and collaboration spaces. Where music and video content come to life.",
+    status: "active",
     requiredAccess: "premium",
     thumbnail: "/studioBeltThumb.png",
     coordinates: { lat: 40.75, lng: -73.99 },
     features: [
-      "Multi-track Recording",
+      "Multi-track Recording Studios",
       "Video Production Suites",
       "Collaboration Rooms",
-      "Equipment Marketplace"
+      "Content Creation Tools",
+      "Equipment & Resource Library"
     ],
     entryPoint: "/world/studio-belt"
   },
   {
     id: "garden-ring",
-    name: "Garden Ring",
-    district: "Serenity Zone",
-    description: "A tranquil realm of meditation spaces, ambient soundscapes, and peaceful exploration. The light wing of the Karma Universe.",
+    name: "Chakra Center",
+    district: "Healing & Wellness Center",
+    description: "A sacred healing sanctuary for mental, physical, and spiritual wellness. Explore curated books, resources, and tools for holistic health. Join an invitation-only community for deep connection and support.",
     status: "coming-soon",
     requiredAccess: "basic",
     thumbnail: "/gardenRingThumb.png",
     coordinates: { lat: 51.51, lng: -0.13 },
     features: [
-      "Meditation Spaces",
-      "Ambient Music Library",
-      "Nature Walks",
-      "Wellness Content"
+      "Mental Health Resources & Books",
+      "Physical Wellness Programs",
+      "Invitation-Only Social Community",
+      "Meditation & Healing Spaces",
+      "Curated Wellness Library",
+      "Member-to-Member Invitations"
     ],
     entryPoint: "/world/garden-ring"
-  },
-  {
-    id: "shadow-market",
-    name: "Shadow Market",
-    district: "Exchange District",
-    description: "The underground marketplace for exclusive drops, limited releases, and rare collectibles. Premium access only.",
-    status: "coming-soon",
-    requiredAccess: "premium",
-    thumbnail: "/shadowMarketThumb.png",
-    coordinates: { lat: 35.68, lng: 139.65 },
-    features: [
-      "Exclusive Merch Drops",
-      "NFT Gallery",
-      "Auction House",
-      "VIP Pre-orders"
-    ],
-    entryPoint: "/world/shadow-market"
   },
   {
     id: "arcane-tower",
     name: "Arcane Tower",
     district: "AI Nexus",
-    description: "The central hub for Ask CLE AI. Dive deep into conversations, unlock knowledge, and explore AI-powered experiences.",
+    description: "The central hub for Ask CLE AI. Dive deep into conversations, unlock knowledge archives, and explore AI-powered educational experiences.",
     status: "coming-soon",
     requiredAccess: "basic",
     thumbnail: "/arcaneTowerThumb.png",
     coordinates: { lat: 48.86, lng: 2.35 },
     features: [
       "CLE Conversation Hub",
-      "AI Memory Archives",
-      "Knowledge Library",
-      "Interactive Tutorials"
+      "AI Memory & Knowledge Archives",
+      "Interactive Learning Modules",
+      "Advanced AI Tutorials",
+      "Personalized Education Pathways",
+      "Research & Development Lab"
     ],
     entryPoint: "/world/arcane-tower"
   }

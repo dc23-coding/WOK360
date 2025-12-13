@@ -8,7 +8,9 @@ import { CleAssistant } from "./ai/cle";
 import UniversePage from "./universe/UniversePage";
 
 // Lazy-load world modules
+const ClubHollywoodWorld = lazy(() => import("./worlds/clubHollywood/ClubHollywoodWorld"));
 const KazmoMansionWorld = lazy(() => import("./worlds/kazmoMansion/KazmoMansionWorld"));
+const StudioBeltWorld = lazy(() => import("./worlds/studioBelt/StudioBeltWorld"));
 
 export default function AppRouter() {
   const { user, signOut } = useSupabaseAuth();
@@ -46,6 +48,26 @@ export default function AppRouter() {
           ACTIVE WORLD RENDERER
       --------------------------------------------------------------------------- */}
       <AnimatePresence mode="wait">
+        {activeWorld === "club-hollywood" && (
+          <motion.div
+            key="club-hollywood"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Suspense fallback={
+              <div className="w-screen h-screen bg-black flex items-center justify-center">
+                <div className="text-cyan-400 text-xl">Loading Club Hollywood...</div>
+              </div>
+            }>
+              <ClubHollywoodWorld
+                onExitWorld={handleExitWorld}
+              />
+            </Suspense>
+          </motion.div>
+        )}
+
         {activeWorld === "kazmo-mansion" && (
           <motion.div
             key="kazmo-mansion"
@@ -68,14 +90,45 @@ export default function AppRouter() {
           </motion.div>
         )}
 
-        {/* Future worlds can be added here */}
-        {/* {activeWorld === "studio-belt" && <StudioBeltWorld ... />} */}
+        {activeWorld === "studio-belt" && (
+          <motion.div
+            key="studio-belt"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Suspense fallback={
+              <div className="w-screen h-screen bg-black flex items-center justify-center">
+                <div className="text-purple-400 text-xl">Loading Studio Belt...</div>
+              </div>
+            }>
+              <StudioBeltWorld
+                isPremium={isPremium}
+                onExitWorld={handleExitWorld}
+              />
+            </Suspense>
+          </motion.div>
+        )}
       </AnimatePresence>
 
       {/* ---------------------------------------------------------------------------
           GLOBAL CLE ASSISTANT - Available everywhere in universe
       --------------------------------------------------------------------------- */}
       {activeWorld && <CleAssistant />}
+
+      {/* ---------------------------------------------------------------------------
+          GLOBAL UNIVERSE MAP BUTTON - Available in all worlds
+      --------------------------------------------------------------------------- */}
+      {activeWorld && (
+        <button
+          onClick={handleExitWorld}
+          className="fixed top-4 left-4 z-[80] px-4 py-2 rounded-full bg-slate-900/80 backdrop-blur border border-slate-700 text-slate-300 hover:text-white hover:border-cyan-400/50 text-sm transition shadow-lg"
+          title="Return to Universe Map"
+        >
+          ← Universe Map
+        </button>
+      )}
 
       {/* Sign out button */}
       {user && (

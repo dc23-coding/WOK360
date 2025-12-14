@@ -162,7 +162,7 @@ function processPageFile(filePath, routes) {
 
 function main() {
   const pagesDir = path.join(process.cwd(), 'src', 'pages');
-  const appJsxPath = path.join(process.cwd(), 'src', 'App.jsx');
+  const appJsxPath = path.join(process.cwd(), 'src', 'AppRouter.jsx');
 
   let pages = [];
   
@@ -177,9 +177,9 @@ function main() {
       .map(filePath => processPageFile(filePath, routes))
       .filter(Boolean);
   }
-  // If no pages were found from Helmet metadata, fall back to App.jsx
+  // If no pages were found from Helmet metadata, fall back to AppRouter.jsx
   if (pages.length === 0) {
-    console.warn('⚠️ No pages with Helmet components found — falling back to App.jsx');
+    console.warn('⚠️ No pages with Helmet components found — falling back to AppRouter.jsx');
     const fileName = path.basename(appJsxPath, path.extname(appJsxPath));
     pages.push({
       url: generateFallbackUrl(fileName),

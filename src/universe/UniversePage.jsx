@@ -1,13 +1,42 @@
 // src/universe/UniversePage.jsx
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { useSupabaseAuth } from "../context/SupabaseAuthContext";
 import { regions, getAccessibleRegions } from "./data/regions";
 import RegionCard from "./components/RegionCard";
 import MapGlobe from "./components/MapGlobe";
+import GlobalAuthGate from "../components/GlobalAuthGate";
 
 export default function UniversePage({ isPremium, onEnterWorld }) {
+  const { user } = useSupabaseAuth();
   const [viewMode, setViewMode] = useState("grid"); // "grid" | "globe"
+  const [pendingWorld, setPendingWorld] = useState(null);
   const accessibleRegions = getAccessibleRegions(isPremium);
+
+  const handleWorldClick = (worldId) => {
+    const world = regions.find(r => r.id === worldId);
+    
+    // Check if auth required and if world requires wallet
+    const requiresWallet = world?.id === "shadow-market";
+    
+    if (!user) {
+      // Show auth gate
+      setPendingWorld({ id: worldId, requiresWallet });
+    } else if (requiresWallet && !user.walletAddress) {
+      // Show wallet connection
+      setPendingWorld({ id: worldId, requiresWallet });
+    } else {
+      // User is authenticated, proceed
+      onEnterWorld(worldId);
+    }
+  };
+
+  const handleAuthComplete = () => {
+    if (pendingWorld) {
+      onEnterWorld(pendingWorld.id);
+      setPendingWorld(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-black via-slate-900 to-black text-white overflow-hidden">
@@ -65,7 +94,7 @@ export default function UniversePage({ isPremium, onEnterWorld }) {
                   key={region.id}
                   region={region}
                   isAccessible={accessibleRegions.includes(region)}
-                  onEnter={() => onEnterWorld(region.id)}
+                  onEnter={() => handleWorldClick(region.id)}
                   delay={idx * 0.1}
                 />
               ))}
@@ -74,16 +103,20 @@ export default function UniversePage({ isPremium, onEnterWorld }) {
             <MapGlobe
               regions={regions}
               accessibleRegions={accessibleRegions}
-              onRegionClick={(regionId) => {
-                const region = regions.find(r => r.id === regionId);
-                if (accessibleRegions.includes(region)) {
-                  onEnterWorld(regionId);
-                }
-              }}
+              onRegionClick={handleWorldClick}
             />
           )}
         </div>
       </main>
+
+      {/* Auth Gate Modal */}
+      {pendingWorld && (
+        <GlobalAuthGate
+          worldName={regions.find(r => r.id === pendingWorld.id)?.name || "World"}
+          requireWallet={pendingWorld.requiresWallet}
+          onAuthenticated={handleAuthComplete}
+        />
+      )}
 
       {/* Background Effects */}
       <div className="fixed inset-0 pointer-events-none">

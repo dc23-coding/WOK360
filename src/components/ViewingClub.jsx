@@ -5,8 +5,8 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import VibePlayer from "./VibePlayer";
 
-export default function ViewingClub({ variant = "dark" }) {
-  const [isLive, setIsLive] = useState(false);
+export default function ViewingClub({ variant = "dark", mode = "vod" }) {
+  const [isLive, setIsLive] = useState(mode === "live");
 
   // PHASE 1: Metrics (Anonymous Aggregates)
   const [metrics, setMetrics] = useState({
@@ -458,7 +458,7 @@ export default function ViewingClub({ variant = "dark" }) {
 
       {/* Vibe Player - Music Selection */}
       <div className="p-6 border-t border-cyan-500/10">
-        <VibePlayer variant={variant} />
+        <VibePlayer variant={variant} mode={mode} locked={mode === "live"} />
       </div>
 
       {/* Ambient Background */}

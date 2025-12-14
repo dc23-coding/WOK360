@@ -10,6 +10,7 @@ import UniversePage from "./universe/UniversePage";
 // Lazy-load world modules
 const ClubHollywoodWorld = lazy(() => import("./worlds/clubHollywood/ClubHollywoodWorld"));
 const KazmoMansionWorld = lazy(() => import("./worlds/kazmoMansion/KazmoMansionWorld"));
+const ShadowMarketWorld = lazy(() => import("./worlds/shadowMarket/ShadowMarketWorld"));
 const StudioBeltWorld = lazy(() => import("./worlds/studioBelt/StudioBeltWorld"));
 
 export default function AppRouter() {
@@ -84,6 +85,26 @@ export default function AppRouter() {
               <KazmoMansionWorld
                 isPremium={isPremium}
                 user={user}
+                onExitWorld={handleExitWorld}
+              />
+            </Suspense>
+          </motion.div>
+        )}
+
+        {activeWorld === "shadow-market" && (
+          <motion.div
+            key="shadow-market"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Suspense fallback={
+              <div className="w-screen h-screen bg-black flex items-center justify-center">
+                <div className="text-purple-400 text-xl">Loading Shadow Market...</div>
+              </div>
+            }>
+              <ShadowMarketWorld
                 onExitWorld={handleExitWorld}
               />
             </Suspense>

@@ -27,7 +27,7 @@ export const regions = [
     name: "Shadow Market",
     district: "Exchange District",
     description: "The decentralized marketplace for crypto trading, real estate listings, and real-world assets. Trade on the DEX, invest in tokenized properties, and access exclusive RWA opportunities.",
-    status: "coming-soon",
+    status: "active",
     requiredAccess: "basic",
     thumbnail: "/shadowMarketThumb.png",
     coordinates: { lat: 35.68, lng: 139.65 },

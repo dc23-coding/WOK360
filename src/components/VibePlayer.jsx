@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-export default function VibePlayer({ variant = "dark" }) {
+export default function VibePlayer({ variant = "dark", mode = "vod", locked = false }) {
   const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(0.7);
@@ -83,7 +83,7 @@ export default function VibePlayer({ variant = "dark" }) {
   }, [activeVibe]);
 
   const togglePlay = () => {
-    if (!audioRef.current) return;
+    if (!audioRef.current || locked) return;
     if (isPlaying) {
       audioRef.current.pause();
       setIsPlaying(false);
@@ -111,6 +111,7 @@ export default function VibePlayer({ variant = "dark" }) {
   };
 
   const handleVibeSelect = (vibe) => {
+    if (locked) return;
     setActiveVibe(vibe);
     setIsExpanded(false);
   };
@@ -141,8 +142,11 @@ export default function VibePlayer({ variant = "dark" }) {
             <div className="text-2xl">{activeVibe.icon}</div>
             <div>
               <button
-                onClick={() => setIsExpanded(!isExpanded)}
-                className="text-sm font-semibold text-white hover:text-cyan-300 transition flex items-center gap-1"
+                onClick={() => !locked && setIsExpanded(!isExpanded)}
+                disabled={locked}
+                className={`text-sm font-semibold text-white hover:text-cyan-300 transition flex items-center gap-1 ${
+                  locked ? "opacity-50 cursor-not-allowed" : ""
+                }`}
               >
                 {activeVibe.name}
                 <span className="text-xs opacity-60">{isExpanded ? "▲" : "▼"}</span>
@@ -154,7 +158,9 @@ export default function VibePlayer({ variant = "dark" }) {
           {/* Play/Pause */}
           <button
             onClick={togglePlay}
+            disabled={locked}
             className={`w-12 h-12 rounded-full flex items-center justify-center transition ${
+              locked ? "opacity-50 cursor-not-allowed" : ""} ${
               isDark
                 ? "bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/50"
                 : "bg-purple-500/20 hover:bg-purple-500/30 border border-purple-400/50"
@@ -182,7 +188,9 @@ export default function VibePlayer({ variant = "dark" }) {
                   <button
                     key={vibe.id}
                     onClick={() => handleVibeSelect(vibe)}
+                    disabled={locked}
                     className={`p-3 rounded-lg border transition text-left ${
+                      locked ? "opacity-50 cursor-not-allowed" : ""} ${
                       activeVibe.id === vibe.id
                         ? isDark
                           ? "border-cyan-400 bg-cyan-500/20"

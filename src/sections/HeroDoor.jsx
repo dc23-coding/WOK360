@@ -1,11 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import RoomSection from "../components/RoomSection";
-import { useSupabaseAuth } from "../context/SupabaseAuthContext";
+import { useSupabaseAuth } from "../context/ClerkAuthContext";
+import { getUserByPersonalCode, MASTER_KEY } from "../lib/zoneAccessControl";
 import SignInForm from "../components/SignInForm";
 import SignUpForm from "../components/SignUpForm";
-
-// NOTE: this is NOT a true secret; VITE_ vars are visible in the bundle.
-const ADMIN_CODE = import.meta.env.VITE_ADMIN_ACCESS_CODE || "3104";
 
 export default function HeroDoor({
   isSignedIn,
@@ -13,12 +11,14 @@ export default function HeroDoor({
   onKeypadAccess,
   onEnterHouse,
 }) {
+  const { supabase } = useSupabaseAuth();
   const [showKeypad, setShowKeypad] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [authTab, setAuthTab] = useState("signin"); // 'signin' | 'signup'
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [showEnterConfirm, setShowEnterConfirm] = useState(false);
+  const [codeType, setCodeType] = useState(""); // 'master' | 'personal' | ''
   const modalRef = useRef(null);
 
   // If user logs in via Supabase, close the auth tablet and show enter confirmation
@@ -30,7 +30,7 @@ export default function HeroDoor({
   }, [isSignedIn, showAuth]);
 
   // --- keypad handlers ---
-  const handleDigit = (d) => {
+  const handleDigit = async (d) => {
     setError("");
     if (code.length >= 4) return;
 
@@ -38,14 +38,36 @@ export default function HeroDoor({
     setCode(next);
 
     if (next.length === 4) {
-      if (next === String(ADMIN_CODE)) {
+      // Check if it's the master key (admin access)
+      if (next === MASTER_KEY) {
+        setCodeType("master");
         setTimeout(() => {
-          onKeypadAccess();
+          onKeypadAccess(); // Grant admin access
           setShowKeypad(false);
           setCode("");
+          setCodeType("");
         }, 120);
+        return;
+      }
+      
+      // Check if it's a personal code (user shortcut)
+      const result = await getUserByPersonalCode(supabase, next);
+      
+      if (result.email) {
+        setCodeType("personal");
+        // Personal code found - auto-fill email in signin
+        setError(`Code recognized for ${result.email.substring(0, 3)}***`);
+        setTimeout(() => {
+          setShowKeypad(false);
+          setShowAuth(true);
+          setAuthTab("signin");
+          setCode("");
+          setCodeType("");
+          // You could auto-fill the email here if you modify SignInForm
+        }, 1500);
       } else {
-        setError("Access denied");
+        setError("Code not recognized");
+        setCodeType("");
         setTimeout(() => setCode(""), 250);
       }
     }
@@ -83,6 +105,11 @@ export default function HeroDoor({
                     type="button"
                     onClick={() => {
                       setShowEnterConfirm(false);
+                      // Play doorbell sound
+                      const doorbell = new Audio('/doorbell.mp3');
+                      doorbell.volume = 0.4;
+                      doorbell.play().catch(() => {/* ignore */});
+                      
                       try {
                         onEnterHouse();
                       } catch (e) {
@@ -91,7 +118,7 @@ export default function HeroDoor({
                     }}
                     className="px-4 py-2 rounded-full bg-amber-400 text-black font-semibold"
                   >
-                    Enter
+                    🔔 Enter
                   </button>
                   <button
                     type="button"
@@ -132,7 +159,13 @@ export default function HeroDoor({
 
                 <button
                   type="button"
-                  onClick={onEnterHouse}
+                  onClick={() => {
+                    // Play doorbell sound
+                    const doorbell = new Audio('/doorbell.mp3');
+                    doorbell.volume = 0.4;
+                    doorbell.play().catch(() => {/* ignore */});
+                    onEnterHouse();
+                  }}
                   className="inline-flex items-center justify-center px-6 py-2.5 rounded-full bg-amber-400 text-black text-sm font-semibold shadow-[0_0_26px_rgba(252,211,77,0.95)] hover:bg-amber-300 transition"
                 >
                   Enter House
@@ -147,7 +180,7 @@ export default function HeroDoor({
                   onClick={() => setShowKeypad(true)}
                   className="mt-2 text-[10px] text-amber-200/70 underline hover:text-amber-100/90"
                 >
-                  Admin access code
+                  Master Key
                 </button>
               </div>
             )}
@@ -155,6 +188,10 @@ export default function HeroDoor({
             {/* ---------- 2. GUEST STATE (DEFAULT) ---------- */}
             {!canEnter && !showKeypad && !showAuth && (
               <div className="flex flex-col items-center gap-4">
+                <div className="mb-2 px-4 py-2 rounded-xl bg-amber-900/30 border border-amber-500/50">
+                  <p className="text-[11px] text-amber-200/90">🚪 Not Home</p>
+                </div>
+                
                 <p className="text-[10px] uppercase tracking-[0.3em] text-amber-300/80">
                   Welcome guest
                 </p>
@@ -179,7 +216,7 @@ export default function HeroDoor({
                   onClick={() => setShowKeypad(true)}
                   className="mt-2 text-[10px] text-amber-200/70 underline hover:text-amber-100/90"
                 >
-                  Admin access code
+                  Master Key
                 </button>
               </div>
             )}
@@ -189,7 +226,7 @@ export default function HeroDoor({
               <div className="flex flex-col items-center gap-4">
                 <div className="w-full flex justify-between items-center mb-1">
                   <p className="text-[10px] uppercase tracking-[0.3em] text-amber-300/80">
-                    Access code
+                    Master Key
                   </p>
                   <button
                     type="button"
@@ -249,7 +286,7 @@ export default function HeroDoor({
                 </div>
 
                 <p className="mt-1 text-[10px] text-amber-100/60">
-                  4-digit admin route. Keep this between us.
+                  Master key for admin • Personal codes for quick access
                 </p>
               </div>
             )}
@@ -304,7 +341,10 @@ export default function HeroDoor({
       {authTab === "signin" ? (
         <SignInForm onSuccess={() => setShowAuth(false)} />
       ) : (
-        <SignUpForm onSuccess={() => setShowAuth(false)} />
+        <SignUpForm 
+          onSuccess={() => setShowAuth(false)} 
+          signupZone="kazmo-mansion"
+        />
       )}
     </div>
   </div>

@@ -9,7 +9,8 @@ export const regions = [
     owner: "Professor Cle",
     description: "Professor Cleshay's legendary mansion. Follow exclusive live sessions, crypto market insights, and learning centers. Stay connected with Professor Cle's latest content and educational experiences.",
     status: "active",
-    requiredAccess: "basic",
+    requiredAccess: "authenticated", // Login required - gold-plated signin
+    zoneCode: "1000", // Mansion zone code
     thumbnail: "/mansionThumb.png",
     coordinates: { lat: 34.05, lng: -118.25 },
     features: [
@@ -28,7 +29,9 @@ export const regions = [
     district: "Exchange District",
     description: "The decentralized marketplace for crypto trading, real estate listings, and real-world assets. Trade on the DEX, invest in tokenized properties, and access exclusive RWA opportunities.",
     status: "active",
-    requiredAccess: "basic",
+    requiredAccess: "authenticated", // Login required - separate user base
+    zoneCode: "2000", // Shadow Market zone code
+    allowWalletAuth: true, // Enable crypto wallet authentication
     thumbnail: "/shadowMarketThumb.png",
     coordinates: { lat: 35.68, lng: 139.65 },
     features: [
@@ -47,7 +50,8 @@ export const regions = [
     district: "Entertainment District",
     description: "Cinema-style presence lounge where you watch content together. Join live sessions with Professor Cle and the community. Free for all visitors.",
     status: "active",
-    requiredAccess: "basic",
+    requiredAccess: "none", // No login required - enhanced for logged-in users
+    zoneCode: "3000", // Club Hollywood zone code
     thumbnail: "/clubHollywoodThumb.png",
     coordinates: { lat: 34.10, lng: -118.35 },
     features: [
@@ -79,23 +83,25 @@ export const regions = [
     entryPoint: "/world/studio-belt"
   },
   {
-    id: "garden-ring",
+    id: "chakra-center",
     name: "Chakra Center",
     district: "Healing & Wellness Center",
     description: "A sacred healing sanctuary for mental, physical, and spiritual wellness. Explore curated books, resources, and tools for holistic health. Join an invitation-only community for deep connection and support.",
     status: "coming-soon",
-    requiredAccess: "basic",
+    requiredAccess: "none", // Free access - premium for tracking
+    zoneCode: "4000", // Chakra Center zone code
+    premiumFeatures: ["Health Tracking", "Personalized AI Plans", "Progress Analytics"],
     thumbnail: "/gardenRingThumb.png",
     coordinates: { lat: 51.51, lng: -0.13 },
     features: [
-      "Mental Health Resources & Books",
-      "Physical Wellness Programs",
-      "Invitation-Only Social Community",
-      "Meditation & Healing Spaces",
-      "Curated Wellness Library",
-      "Member-to-Member Invitations"
+      "Binaural Sounds Library",
+      "Downloadable Books & Resources",
+      "Health Tips & Videos",
+      "Daily Wellness Plans",
+      "AI Arcane Health Advice",
+      "Premium: Progress Tracking"
     ],
-    entryPoint: "/world/garden-ring"
+    entryPoint: "/world/chakra-center"
   },
   {
     id: "arcane-tower",
@@ -103,7 +109,9 @@ export const regions = [
     district: "AI Nexus",
     description: "The central hub for Ask CLE AI. Dive deep into conversations, unlock knowledge archives, and explore AI-powered educational experiences.",
     status: "coming-soon",
-    requiredAccess: "basic",
+    requiredAccess: "none", // Free access - AI interactions
+    zoneCode: "6000", // AI Arcane zone code
+    premiumFeatures: ["Extended Conversations", "Memory Archives", "Advanced Modules"],
     thumbnail: "/arcaneTowerThumb.png",
     coordinates: { lat: 48.86, lng: 2.35 },
     features: [
@@ -118,16 +126,16 @@ export const regions = [
   }
 ];
 
+// ============================================================================
+// Helper Functions
+// ============================================================================
+
 export const getRegionById = (id) => regions.find(r => r.id === id);
 
 export const getActiveRegions = () => regions.filter(r => r.status === "active");
 
 export const getComingSoonRegions = () => regions.filter(r => r.status === "coming-soon");
 
-export const getAccessibleRegions = (isPremium = false) => {
-  return regions.filter(r => {
-    if (r.requiredAccess === "basic") return true;
-    if (r.requiredAccess === "premium") return isPremium;
-    return false;
-  });
-};
+// NOTE: With zone-based auth, all regions are visible on the map
+// Authentication is handled at world entry (Kazmo Mansion, Shadow Market)
+export const getAllRegions = () => regions;

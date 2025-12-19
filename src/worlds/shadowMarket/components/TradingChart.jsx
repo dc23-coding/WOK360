@@ -86,6 +86,9 @@ export default function TradingChart({ selectedPair, currentPrice }) {
   // Update ONLY the current candle with live price changes
   useEffect(() => {
     if (!currentPrice || !historicalDataRef.current || !lastCandleRef.current) return;
+    
+    // Skip updates if we're still loading historical data
+    if (isLoading) return;
 
     const updateCurrentCandle = () => {
       const current = lastCandleRef.current;
@@ -115,7 +118,7 @@ export default function TradingChart({ selectedPair, currentPrice }) {
     };
 
     updateCurrentCandle();
-  }, [currentPrice]); // Only update when current price changes
+  }, [currentPrice, isLoading]); // Only update when current price changes and not loading
 
   // Handle canvas clicks for drawing tools
   const handleCanvasClick = (event) => {

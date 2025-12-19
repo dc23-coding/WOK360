@@ -2,7 +2,7 @@
 // Universal authentication gate with Supabase + Wallet Connect
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useSupabaseAuth } from "../context/SupabaseAuthContext";
+import { useSupabaseAuth } from "../context/ClerkAuthContext";
 import SignInForm from "./SignInForm";
 import SignUpForm from "./SignUpForm";
 

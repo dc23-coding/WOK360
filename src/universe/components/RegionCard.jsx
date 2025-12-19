@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 export default function RegionCard({ region, isAccessible, onEnter, delay = 0 }) {
   const isActive = region.status === "active";
   const isLocked = !isAccessible;
+  const requiresAuth = region.requiredAccess === "authenticated";
 
   return (
     <motion.div
@@ -45,9 +46,13 @@ export default function RegionCard({ region, isAccessible, onEnter, delay = 0 })
             <span className="px-2 py-1 rounded-full bg-red-500/20 border border-red-500/50 text-red-300 text-xs">
               🔒 Premium
             </span>
+          ) : requiresAuth ? (
+            <span className="px-2 py-1 rounded-full bg-cyan-500/20 border border-cyan-500/50 text-cyan-300 text-xs">
+              🔑 Login
+            </span>
           ) : (
             <span className="px-2 py-1 rounded-full bg-green-500/20 border border-green-500/50 text-green-300 text-xs">
-              ✓ Open
+              ✓ Free
             </span>
           )}
         </div>

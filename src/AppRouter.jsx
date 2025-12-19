@@ -1,8 +1,10 @@
 // src/AppRouter.jsx
 // World of Karma 360 - Universe Router
+// Users enter directly to Universe Map - no global authentication required
+// Authentication is zone-specific: Kazmo Mansion & Shadow Market only
 import { useState, Suspense, lazy } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { useSupabaseAuth } from "./context/SupabaseAuthContext";
+import { useSupabaseAuth } from "./context/ClerkAuthContext";
 import { CleAssistant } from "./ai/cle";
 
 import UniversePage from "./universe/UniversePage";
@@ -19,7 +21,8 @@ export default function AppRouter() {
   // Premium logic
   const isPremium = user?.app_metadata?.premium === true;
 
-  const [activeWorld, setActiveWorld] = useState(null); // null | "kazmo-mansion" | "studio-belt" etc-------------------------------------
+  // Universe state - users start here without authentication
+  const [activeWorld, setActiveWorld] = useState(null); // null | "kazmo-mansion" | "shadow-market" | "club-hollywood" etc-------------------------------------
   // Navigate to a specific world
   // ---------------------------------------------------------------------------
   const handleEnterWorld = (worldId) => {

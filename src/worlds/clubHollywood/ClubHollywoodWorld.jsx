@@ -1,7 +1,7 @@
 // src/worlds/clubHollywood/ClubHollywoodWorld.jsx
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useSupabaseAuth } from "../../context/SupabaseAuthContext";
+import { useSupabaseAuth } from "../../context/ClerkAuthContext";
 import AudienceRail from "../../components/AudienceRail";
 import MixSelector from "../../components/MixSelector";
 import PresenceIndicator from "../../components/PresenceIndicator";

@@ -1,7 +1,7 @@
 // src/components/AskCleAssistant.jsx
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useSupabaseAuth } from "../../context/SupabaseAuthContext";
+import { useSupabaseAuth } from "../../context/ClerkAuthContext";
 
 export default function AskCleAssistant() {
   const { user } = useSupabaseAuth();

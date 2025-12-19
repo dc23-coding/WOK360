@@ -19,20 +19,29 @@ export default function DexExchange({ selectedPair }) {
   // Fetch real-time price from Coinbase
   useEffect(() => {
     let ws = null;
+    let isActive = true; // Track if this effect is still active
+
+    // Reset price immediately when pair changes
+    setCurrentPrice(null);
+    setTicker(null);
 
     const initializePriceData = async () => {
       // Initial fetch
       const tickerData = await fetchTicker(selectedPair);
-      if (tickerData) {
+      if (tickerData && isActive) {
         setCurrentPrice(tickerData.price);
         setTicker(tickerData);
       }
 
       // Setup WebSocket for real-time updates
-      ws = new CoinbaseWebSocket([selectedPair], ['ticker']);
+      const currentPair = selectedPair; // Capture current pair in closure
+      const productId = currentPair.replace('/', '-');
+      
+      ws = new CoinbaseWebSocket([currentPair], ['ticker']);
       
       ws.on('ticker', (data) => {
-        if (data.type === 'ticker' && data.product_id === selectedPair.replace('/', '-')) {
+        // Only update if we're still active and this is the correct pair
+        if (isActive && data.type === 'ticker' && data.product_id === productId) {
           const price = parseFloat(data.price);
           if (!isNaN(price)) {
             setCurrentPrice(price);
@@ -53,6 +62,7 @@ export default function DexExchange({ selectedPair }) {
     initializePriceData();
 
     return () => {
+      isActive = false; // Mark as inactive
       if (ws) ws.disconnect();
     };
   }, [selectedPair]);

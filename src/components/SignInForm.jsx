@@ -1,8 +1,8 @@
+import { useSignIn } from "@clerk/clerk-react";
 import { useState } from "react";
-import { useSupabaseAuth } from "../context/SupabaseAuthContext";
 
 export default function SignInForm({ onSuccess }) {
-  const { signInWithEmail, signInWithGoogle } = useSupabaseAuth();
+  const { signIn, isLoaded } = useSignIn();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -10,24 +10,41 @@ export default function SignInForm({ onSuccess }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!isLoaded) return;
+    
     setError("");
     setLoading(true);
 
-    const { error } = await signInWithEmail(email.trim(), password);
-    setLoading(false);
+    try {
+      const result = await signIn.create({
+        identifier: email.trim(),
+        password,
+      });
 
-    if (error) {
-      setError(error.message);
-    } else {
-      onSuccess?.();
+      if (result.status === "complete") {
+        await signIn.setActive({ session: result.createdSessionId });
+        onSuccess?.();
+      }
+    } catch (err) {
+      setError(err.errors?.[0]?.message || "Sign in failed");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleGoogle = async () => {
+    if (!isLoaded) return;
+    
     setError("");
-    const { error } = await signInWithGoogle();
-    if (error) setError(error.message);
-    // OAuth redirects away and back, so onSuccess isn't needed here.
+    try {
+      await signIn.authenticateWithRedirect({
+        strategy: "oauth_google",
+        redirectUrl: window.location.origin + "/sso-callback",
+        redirectUrlComplete: window.location.origin + "/",
+      });
+    } catch (err) {
+      setError(err.errors?.[0]?.message || "Google sign in failed");
+    }
   };
 
   return (
@@ -60,7 +77,7 @@ export default function SignInForm({ onSuccess }) {
 
       <button
         type="submit"
-        disabled={loading}
+        disabled={loading || !isLoaded}
         className="w-full mt-1 rounded-full bg-amber-400 text-black text-xs font-semibold py-1.5 shadow-[0_0_22px_rgba(252,211,77,0.9)] hover:bg-amber-300 transition disabled:opacity-60 disabled:cursor-not-allowed"
       >
         {loading ? "Signing in..." : "Sign in"}
@@ -69,9 +86,10 @@ export default function SignInForm({ onSuccess }) {
       <button
         type="button"
         onClick={handleGoogle}
-        className="w-full mt-1 rounded-full border border-amber-300/80 text-amber-100 text-[11px] py-1.5 hover:bg-amber-100/10 transition"
+        disabled={!isLoaded}
+        className="w-full mt-1 rounded-full border border-amber-300/80 text-amber-100 text-[11px] py-1.5 hover:bg-amber-100/10 transition disabled:opacity-60"
       >
-        Continue with Google
+        🔐 Continue with Google
       </button>
     </form>
   );

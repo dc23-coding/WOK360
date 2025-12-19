@@ -1,35 +1,38 @@
 // src/universe/UniversePage.jsx
+// Universe Map - Direct entry, no global authentication required
+// Authentication handled per-zone (Kazmo Mansion, Shadow Market)
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { useSupabaseAuth } from "../context/SupabaseAuthContext";
-import { regions, getAccessibleRegions } from "./data/regions";
+import { useSupabaseAuth } from "../context/ClerkAuthContext";
+import { regions } from "./data/regions";
+import { requiresAuthentication } from "../lib/zoneAccessControl";
 import RegionCard from "./components/RegionCard";
 import MapGlobe from "./components/MapGlobe";
-import GlobalAuthGate from "../components/GlobalAuthGate";
 
 export default function UniversePage({ isPremium, onEnterWorld }) {
   const { user } = useSupabaseAuth();
   const [viewMode, setViewMode] = useState("grid"); // "grid" | "globe"
-  const [pendingWorld, setPendingWorld] = useState(null);
-  const accessibleRegions = getAccessibleRegions(isPremium);
 
   const handleWorldClick = (worldId) => {
-    const world = regions.find(r => r.id === worldId);
+    const region = regions.find(r => r.id === worldId);
     
-    // Check if auth required and if world requires wallet
-    const requiresWallet = world?.id === "shadow-market";
+    // Check if zone requires authentication
+    const needsAuth = requiresAuthentication(region);
     
-    if (!user) {
-      // Show auth gate
-      setPendingWorld({ id: worldId, requiresWallet });
-    } else if (requiresWallet && !user.walletAddress) {
-      // Show wallet connection
-      setPendingWorld({ id: worldId, requiresWallet });
-    } else {
-      // User is authenticated, proceed
+    // If no auth required, enter directly
+    if (!needsAuth) {
       onEnterWorld(worldId);
+      return;
     }
+    
+    // Authentication required - world itself will handle the auth gate
+    // (Kazmo Mansion has gold-plated signin, Shadow Market has its own)
+    onEnterWorld(worldId);
   };
+  
+  // All regions are visible and accessible from universe map
+  // Authentication is handled at the world entry point
+  const visibleRegions = regions;
 
   const handleAuthComplete = () => {
     if (pendingWorld) {
@@ -52,7 +55,7 @@ export default function UniversePage({ isPremium, onEnterWorld }) {
               World of Karma 360
             </h1>
             <p className="mt-2 sm:mt-3 text-base sm:text-lg md:text-xl text-slate-300">
-              Explore immersive worlds, exclusive content, and interactive experiences
+              Explore immersive worlds — authentication only where needed
             </p>
           </motion.div>
 
@@ -89,34 +92,30 @@ export default function UniversePage({ isPremium, onEnterWorld }) {
         <div className="max-w-7xl mx-auto">
           {viewMode === "grid" ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {regions.map((region, idx) => (
-                <RegionCard
-                  key={region.id}
-                  region={region}
-                  isAccessible={accessibleRegions.includes(region)}
-                  onEnter={() => handleWorldClick(region.id)}
-                  delay={idx * 0.1}
-                />
-              ))}
+              {visibleRegions.map((region, idx) => {
+                // Show as accessible unless it's premium and user doesn't have premium
+                const isAccessible = region.requiredAccess !== "premium" || isPremium;
+                
+                return (
+                  <RegionCard
+                    key={region.id}
+                    region={region}
+                    isAccessible={isAccessible}
+                    onEnter={() => handleWorldClick(region.id)}
+                    delay={idx * 0.1}
+                  />
+                );
+              })}
             </div>
           ) : (
             <MapGlobe
-              regions={regions}
-              accessibleRegions={accessibleRegions}
+              regions={visibleRegions}
+              accessibleRegions={visibleRegions.filter(r => r.requiredAccess !== "premium" || isPremium)}
               onRegionClick={handleWorldClick}
             />
           )}
         </div>
       </main>
-
-      {/* Auth Gate Modal */}
-      {pendingWorld && (
-        <GlobalAuthGate
-          worldName={regions.find(r => r.id === pendingWorld.id)?.name || "World"}
-          requireWallet={pendingWorld.requiresWallet}
-          onAuthenticated={handleAuthComplete}
-        />
-      )}
 
       {/* Background Effects */}
       <div className="fixed inset-0 pointer-events-none">

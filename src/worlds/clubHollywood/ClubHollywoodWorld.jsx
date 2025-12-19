@@ -102,25 +102,22 @@ export default function ClubHollywoodWorld({ onExitWorld }) {
       </div>
 
       {/* Main Layout */}
-      <div className="relative z-10 h-full flex flex-col">
+      <div className="relative z-10 h-full flex flex-col pt-16">
         {/* Header with Presence */}
-        <div className="px-6 py-4 bg-black/60 backdrop-blur-sm border-b border-cyan-500/20">
-          <div className="max-w-[1800px] mx-auto flex items-center justify-between">
-            <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-cyan-400/60 mb-1">
-                Entertainment District
-              </p>
-              <h1 className="text-2xl font-bold text-white">Club Hollywood</h1>
-            </div>
-
-            <PresenceIndicator count={viewerCount} variant="dark" />
+        <div className="px-4 sm:px-6 py-3 sm:py-4 bg-black/40 backdrop-blur-sm border-b border-cyan-500/10 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div>
+            <p className="text-sm text-cyan-400/80">
+              {isLive ? "🔴 LIVE" : "Entertainment District"}
+            </p>
           </div>
+          <PresenceIndicator count={viewerCount} variant="dark" />
         </div>
 
         {/* Main Content Area */}
         <div className="flex-1 flex overflow-hidden">
-          {/* Left Sidebar - Mix Selector */}
-          <div className="w-80 bg-black/60 backdrop-blur-sm border-r border-cyan-500/20 overflow-y-auto p-4">
+          {/* Left Sidebar - Mix Selector (Hidden on Mobile) */}
+          <div className="hidden md:block w-80 bg-black/60 backdrop-blur-sm border-r border-cyan-500/20 overflow-y-auto p-6">
             <MixSelector
               mixes={mixes}
               activeMixId={activeMix?.id}
@@ -150,7 +147,7 @@ export default function ClubHollywoodWorld({ onExitWorld }) {
           </div>
 
           {/* Center - Video Frame Area (matches background frame) */}
-          <div className="flex-1 flex items-center justify-center p-8">
+          <div className="flex-1 flex items-center justify-center p-4 sm:p-6 md:p-8">
             <div className="w-full max-w-5xl aspect-video relative">
               {/* Video Content Placeholder */}
               <div className="absolute inset-0 rounded-lg overflow-hidden bg-black/80 border-2 border-cyan-500/30 shadow-[0_0_40px_rgba(34,211,238,0.2)]">
@@ -200,8 +197,8 @@ export default function ClubHollywoodWorld({ onExitWorld }) {
             </div>
           </div>
 
-          {/* Right Sidebar - User Profile Windows */}
-          <div className="w-80 bg-black/60 backdrop-blur-sm border-l border-cyan-500/20 overflow-y-auto p-4">
+          {/* Right Sidebar - User Profile Windows (Hidden on Mobile) */}
+          <div className="hidden md:block w-80 bg-black/60 backdrop-blur-sm border-l border-cyan-500/20 overflow-y-auto p-4">
             <h3 className="text-sm font-semibold text-cyan-400/70 uppercase tracking-wider mb-4">
               In the Club
             </h3>
@@ -244,13 +241,13 @@ export default function ClubHollywoodWorld({ onExitWorld }) {
         <div className="bg-black/60 backdrop-blur-sm border-t border-cyan-500/20">
           <AudienceRail users={audienceUsers} reactions={reactions} />
           
-          {/* Reaction Buttons */}
-          <div className="px-6 py-3 flex items-center justify-center gap-3 border-t border-cyan-500/10">
+          {/* Reaction Buttons - Touch-optimized (44px minimum) */}
+          <div className="px-4 sm:px-6 py-3 flex items-center justify-center gap-2 sm:gap-3 border-t border-cyan-500/10">
             {["👍", "👏", "❤️", "🔥"].map((emoji) => (
               <button
                 key={emoji}
                 onClick={() => handleReaction(emoji, user?.id || "guest")}
-                className="w-12 h-12 rounded-full bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 hover:border-cyan-400/50 flex items-center justify-center text-2xl transition-all hover:scale-110 active:scale-95"
+                className="w-11 h-11 sm:w-12 sm:h-12 min-w-[44px] min-h-[44px] rounded-full bg-cyan-500/10 hover:bg-cyan-500/20 active:bg-cyan-500/30 border border-cyan-500/30 hover:border-cyan-400/50 flex items-center justify-center text-xl sm:text-2xl transition-all hover:scale-110 active:scale-95 touch-manipulation"
               >
                 {emoji}
               </button>

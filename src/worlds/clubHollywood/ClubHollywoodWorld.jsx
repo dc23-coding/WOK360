@@ -119,8 +119,8 @@ export default function ClubHollywoodWorld({ onExitWorld }) {
 
         {/* Main Content Area */}
         <div className="flex-1 flex overflow-hidden">
-          {/* Left Sidebar - Mix Selector */}
-          <div className="w-80 bg-black/60 backdrop-blur-sm border-r border-cyan-500/20 overflow-y-auto p-4">
+          {/* Left Sidebar - Mix Selector (Hidden on Mobile) */}
+          <div className="hidden md:block w-80 bg-black/60 backdrop-blur-sm border-r border-cyan-500/20 overflow-y-auto p-6">
             <MixSelector
               mixes={mixes}
               activeMixId={activeMix?.id}
@@ -150,7 +150,7 @@ export default function ClubHollywoodWorld({ onExitWorld }) {
           </div>
 
           {/* Center - Video Frame Area (matches background frame) */}
-          <div className="flex-1 flex items-center justify-center p-8">
+          <div className="flex-1 flex items-center justify-center p-4 sm:p-6 md:p-8">
             <div className="w-full max-w-5xl aspect-video relative">
               {/* Video Content Placeholder */}
               <div className="absolute inset-0 rounded-lg overflow-hidden bg-black/80 border-2 border-cyan-500/30 shadow-[0_0_40px_rgba(34,211,238,0.2)]">
@@ -200,8 +200,8 @@ export default function ClubHollywoodWorld({ onExitWorld }) {
             </div>
           </div>
 
-          {/* Right Sidebar - User Profile Windows */}
-          <div className="w-80 bg-black/60 backdrop-blur-sm border-l border-cyan-500/20 overflow-y-auto p-4">
+          {/* Right Sidebar - User Profile Windows (Hidden on Mobile) */}
+          <div className="hidden md:block w-80 bg-black/60 backdrop-blur-sm border-l border-cyan-500/20 overflow-y-auto p-4">
             <h3 className="text-sm font-semibold text-cyan-400/70 uppercase tracking-wider mb-4">
               In the Club
             </h3>

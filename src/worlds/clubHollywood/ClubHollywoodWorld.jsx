@@ -11,6 +11,8 @@ export default function ClubHollywoodWorld({ onExitWorld }) {
   const [activeMix, setActiveMix] = useState(null);
   const [reactions, setReactions] = useState([]);
   const [viewerCount, setViewerCount] = useState(12);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isLive, setIsLive] = useState(false);
 
   // Mock audience users
   const [audienceUsers, setAudienceUsers] = useState([
@@ -116,7 +118,8 @@ export default function ClubHollywoodWorld({ onExitWorld }) {
 
         {/* Main Content Area */}
         <div className="flex-1 flex overflow-hidden">
-          {/* Left Sidebar - Mix Selector (Hidden on Mobile) */}
+          {/* Left Sidebar - Mix Selector (Hidden on Mobile or Fullscreen) */}
+          {!isFullscreen && (
           <div className="hidden md:block w-80 bg-black/60 backdrop-blur-sm border-r border-cyan-500/20 overflow-y-auto p-6">
             <MixSelector
               mixes={mixes}
@@ -145,6 +148,7 @@ export default function ClubHollywoodWorld({ onExitWorld }) {
               </motion.div>
             )}
           </div>
+          )}
 
           {/* Center - Video Frame Area (matches background frame) */}
           <div className="flex-1 flex items-center justify-center p-4 sm:p-6 md:p-8">
@@ -162,6 +166,22 @@ export default function ClubHollywoodWorld({ onExitWorld }) {
                     </p>
                   </div>
                 </div>
+
+                {/* Fullscreen Toggle Button */}
+                <button
+                  onClick={() => setIsFullscreen(!isFullscreen)}
+                  className="absolute top-4 right-4 px-3 py-2 bg-black/80 backdrop-blur-sm rounded-lg border border-cyan-500/30 hover:border-cyan-400/50 hover:bg-black/90 transition-all group"
+                  title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-cyan-400 text-sm">
+                      {isFullscreen ? "⊡" : "⛶"}
+                    </span>
+                    <span className="text-xs text-cyan-400/90 hidden sm:inline">
+                      {isFullscreen ? "Exit" : "Fullscreen"}
+                    </span>
+                  </div>
+                </button>
 
                 {/* Overlay: Now Playing */}
                 {activeMix && (
@@ -197,7 +217,8 @@ export default function ClubHollywoodWorld({ onExitWorld }) {
             </div>
           </div>
 
-          {/* Right Sidebar - User Profile Windows (Hidden on Mobile) */}
+          {/* Right Sidebar - User Profile Windows (Hidden on Mobile or Fullscreen) */}
+          {!isFullscreen && (
           <div className="hidden md:block w-80 bg-black/60 backdrop-blur-sm border-l border-cyan-500/20 overflow-y-auto p-4">
             <h3 className="text-sm font-semibold text-cyan-400/70 uppercase tracking-wider mb-4">
               In the Club
@@ -235,9 +256,11 @@ export default function ClubHollywoodWorld({ onExitWorld }) {
               ))}
             </div>
           </div>
+          )}
         </div>
 
-        {/* Bottom Bar - Audience Rail & Reactions */}
+        {/* Bottom Bar - Audience Rail & Reactions (Hidden in Fullscreen) */}
+        {!isFullscreen && (
         <div className="bg-black/60 backdrop-blur-sm border-t border-cyan-500/20">
           <AudienceRail users={audienceUsers} reactions={reactions} />
           
@@ -254,6 +277,7 @@ export default function ClubHollywoodWorld({ onExitWorld }) {
             ))}
           </div>
         </div>
+        )}
       </div>
     </div>
   );

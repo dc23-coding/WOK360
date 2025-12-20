@@ -6,6 +6,7 @@ import { useState, Suspense, lazy } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSupabaseAuth } from "./context/ClerkAuthContext";
 import { CleAssistant } from "./ai/cle";
+import ContentUploader from "./admin/ContentUploader";
 
 import UniversePage from "./universe/UniversePage";
 
@@ -140,6 +141,11 @@ export default function AppRouter() {
           GLOBAL CLE ASSISTANT - Available everywhere in universe
       --------------------------------------------------------------------------- */}
       {activeWorld && <CleAssistant />}
+
+      {/* ---------------------------------------------------------------------------
+          ADMIN CONTENT UPLOADER - Only visible to admins
+      --------------------------------------------------------------------------- */}
+      <ContentUploader />
 
       {/* ---------------------------------------------------------------------------
           GLOBAL UNIVERSE MAP BUTTON - Available in all worlds

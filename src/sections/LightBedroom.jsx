@@ -3,10 +3,15 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import RoomSection from "../components/RoomSection";
+import { useZoneContent } from "../hooks/useZoneContent";
+import StoryPanelRail from "../components/StoryPanelRail";
 
 export default function LightBedroom({ onToggleMode }) {
   const [activeFeed, setActiveFeed] = useState("dashboard");
   const [selectedLecture, setSelectedLecture] = useState(null);
+  
+  // Fetch Sanity content for this room
+  const { content, loading } = useZoneContent('kazmo', 'light');
 
   // Upcoming crypto lectures
   const upcomingLectures = [

@@ -1,11 +1,12 @@
 import { createContext, useContext, useMemo } from "react";
-import { useUser } from "@clerk/clerk-react";
+import { useUser, useClerk } from "@clerk/clerk-react";
 import { supabase } from "../lib/supabaseClient";
 
 const ClerkAuthContext = createContext(null);
 
 export function ClerkAuthProvider({ children }) {
   const { isLoaded, isSignedIn, user: clerkUser } = useUser();
+  const { signOut: clerkSignOut } = useClerk();
 
   // Transform Clerk user to match old Supabase structure
   const user = useMemo(() => {
@@ -30,9 +31,13 @@ export function ClerkAuthProvider({ children }) {
   );
 
   const signOut = async () => {
-    // Clerk sign out is handled by Clerk's components
-    // This is here for compatibility with existing code
-    console.log("Sign out should be handled by Clerk's UserButton component");
+    try {
+      await clerkSignOut();
+      // Optionally redirect to home or refresh
+      window.location.href = '/';
+    } catch (error) {
+      console.error("Sign out error:", error);
+    }
   };
 
   const value = {

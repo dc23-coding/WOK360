@@ -6,8 +6,8 @@ export const sanityClient = createClient({
   projectId: import.meta.env.VITE_SANITY_PROJECT_ID || 'lp1si6d4',
   dataset: import.meta.env.VITE_SANITY_DATASET || 'production',
   apiVersion: '2024-01-01',
-  useCdn: true, // Use CDN for fast content delivery
-  token: import.meta.env.VITE_SANITY_AUTH_TOKEN, // For write operations
+  useCdn: false, // Use direct API for authenticated requests with private datasets
+  token: import.meta.env.VITE_SANITY_AUTH_TOKEN, // Required for private dataset reads
 });
 
 // Helper for generating image URLs with transformations

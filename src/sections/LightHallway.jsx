@@ -111,6 +111,73 @@ export default function LightHallway({ mode, onToggleMode, onNavigate }) {
           </div>
         </div>
 
+        {/* CONTENT DISPLAY SECTION - Bottom Center */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-[90%] max-w-4xl">
+          {/* Featured Content Banner */}
+          {!loading && featuredContent.length > 0 && (
+            <div className="mb-4 bg-amber-50/90 backdrop-blur-md rounded-xl border-2 border-amber-300/80 p-3 shadow-lg">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">⭐</span>
+                <div className="flex-1">
+                  <p className="text-xs text-amber-600 font-medium">Featured Now</p>
+                  <p className="text-sm text-amber-900 font-semibold">{featuredContent[0].title}</p>
+                </div>
+                <button 
+                  onClick={() => onNavigate('featured-content')}
+                  className="px-3 py-1.5 bg-amber-400 text-amber-900 text-xs font-medium rounded-lg hover:bg-amber-500 transition-colors"
+                >
+                  Watch
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Content Thumbnail Rail */}
+          <div className="bg-amber-50/90 backdrop-blur-md rounded-xl border-2 border-amber-300/80 p-4 shadow-lg">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-semibold text-amber-900">Available Content</h3>
+              <span className="text-xs text-amber-600">{content.length} items</span>
+            </div>
+            
+            {loading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-amber-400"></div>
+              </div>
+            ) : content.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-sm text-amber-700/70">No content uploaded yet</p>
+                <p className="text-xs text-amber-600/60 mt-1">Upload via Admin Panel (code 3104)</p>
+              </div>
+            ) : (
+              <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                {content.slice(0, 8).map((item) => (
+                  <div 
+                    key={item._id}
+                    className="flex-shrink-0 w-32 group cursor-pointer"
+                    onClick={() => onNavigate(item._id)}
+                  >
+                    <div className="aspect-video bg-amber-200/40 rounded-lg overflow-hidden border border-amber-300/50 group-hover:border-amber-400 transition-all">
+                      {item.thumbnail?.asset?.url ? (
+                        <img 
+                          src={item.thumbnail.asset.url} 
+                          alt={item.title}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-2xl">
+                          {item.contentType === 'video' ? '🎬' : '🎵'}
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-xs text-amber-900 font-medium mt-1.5 truncate">{item.title}</p>
+                    <p className="text-[10px] text-amber-600/70 truncate">{item.duration || 'N/A'}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
       </div>
     </RoomSection>
   );

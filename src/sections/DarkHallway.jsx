@@ -83,6 +83,73 @@ export default function DarkHallway({ mode, onToggleMode, onNavigate }) {
           </button>
         </div>
       </div>
+
+      {/* CONTENT DISPLAY SECTION - Bottom Right */}
+      <div className="absolute bottom-8 right-8 w-[90%] md:w-[400px] max-w-md">
+        {/* Featured Content Banner */}
+        {!loading && featuredContent.length > 0 && (
+          <div className="mb-4 bg-slate-900/90 backdrop-blur-md rounded-xl border-2 border-cyan-400/60 p-3 shadow-[0_0_20px_rgba(34,211,238,0.3)]">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">⭐</span>
+              <div className="flex-1">
+                <p className="text-xs text-cyan-400 font-medium">Exclusive Featured</p>
+                <p className="text-sm text-cyan-100 font-semibold">{featuredContent[0].title}</p>
+              </div>
+              <button 
+                onClick={() => onNavigate('featured-content')}
+                className="px-3 py-1.5 bg-cyan-400 text-slate-900 text-xs font-medium rounded-lg hover:bg-cyan-300 transition-colors"
+              >
+                View
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Content Thumbnail Grid */}
+        <div className="bg-slate-900/90 backdrop-blur-md rounded-xl border-2 border-cyan-400/60 p-4 shadow-[0_0_20px_rgba(34,211,238,0.3)]">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold text-cyan-100">Premium Content</h3>
+            <span className="text-xs text-cyan-400">{content.length} exclusive</span>
+          </div>
+          
+          {loading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-cyan-400"></div>
+            </div>
+          ) : content.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-sm text-cyan-300/70">No exclusive content yet</p>
+              <p className="text-xs text-cyan-400/60 mt-1">Upload premium content via Admin</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-3">
+              {content.slice(0, 4).map((item) => (
+                <div 
+                  key={item._id}
+                  className="group cursor-pointer"
+                  onClick={() => onNavigate(item._id)}
+                >
+                  <div className="aspect-video bg-slate-800/60 rounded-lg overflow-hidden border border-cyan-400/30 group-hover:border-cyan-400 transition-all">
+                    {item.thumbnail?.asset?.url ? (
+                      <img 
+                        src={item.thumbnail.asset.url} 
+                        alt={item.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-2xl">
+                        {item.contentType === 'video' ? '🎬' : '🎵'}
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-xs text-cyan-100 font-medium mt-1.5 truncate">{item.title}</p>
+                  <p className="text-[10px] text-cyan-400/70 truncate">{item.duration || 'N/A'}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </RoomSection>
   );
 }

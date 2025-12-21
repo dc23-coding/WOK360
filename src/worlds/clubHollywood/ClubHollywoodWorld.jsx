@@ -2,12 +2,17 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSupabaseAuth } from "../../context/ClerkAuthContext";
+import { useZoneContent } from "../../hooks/useZoneContent";
 import AudienceRail from "../../components/AudienceRail";
 import MixSelector from "../../components/MixSelector";
 import PresenceIndicator from "../../components/PresenceIndicator";
 
 export default function ClubHollywoodWorld({ onExitWorld }) {
   const { user } = useSupabaseAuth();
+  
+  // Fetch real content from Sanity
+  const { content: sanityMixes, loading: contentLoading } = useZoneContent('clubHollywood', 'both');
+  
   const [activeMix, setActiveMix] = useState(null);
   const [reactions, setReactions] = useState([]);
   const [viewerCount, setViewerCount] = useState(12);
@@ -30,38 +35,25 @@ export default function ClubHollywoodWorld({ onExitWorld }) {
     { id: "user-12", name: "Morgan Swift", avatar: null },
   ]);
 
-  // Available mixes for selection
-  const mixes = [
-    {
-      id: "mix-1",
-      name: "Chill Lounge",
-      emoji: "🌙",
-      description: "Relaxed downtempo beats",
-      duration: "45:30",
-      source: "https://example.com/mix1.mp4"
-    },
-    {
-      id: "mix-2",
-      name: "Deep Focus",
-      emoji: "🧠",
-      description: "Ambient concentration flow",
-      duration: "52:15",
-      source: "https://example.com/mix2.mp4"
-    },
-    {
-      id: "mix-3",
-      name: "Upbeat Energy",
-      emoji: "⚡",
-      description: "High-energy motivational",
-      duration: "38:45",
-      source: "https://example.com/mix3.mp4"
-    },
-  ];
+  // Transform Sanity content to mix format
+  const mixes = sanityMixes.map((content) => ({
+    id: content._id,
+    name: content.title,
+    emoji: content.featured ? "⭐" : "🎵",
+    description: content.subtitle || content.description || "No description",
+    duration: content.duration || "00:00",
+    source: content.mediaFile?.asset?.url || "",
+    isLive: content.isLive || false,
+    liveUrl: content.liveStreamUrl || "",
+    thumbnail: content.thumbnail?.asset?.url || "",
+  }));
 
   useEffect(() => {
     // Set initial mix
     if (!activeMix && mixes.length > 0) {
       setActiveMix(mixes[0]);
+      // Check if first mix is live
+      setIsLive(mixes[0].isLive || false);
     }
   }, []);
 
@@ -94,6 +86,16 @@ export default function ClubHollywoodWorld({ onExitWorld }) {
 
   return (
     <div className="w-screen h-screen bg-black text-white overflow-hidden relative">
+      {/* Loading State */}
+      {contentLoading && (
+        <div className="absolute inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-cyan-400 mx-auto mb-4"></div>
+            <p className="text-cyan-400 text-lg">Loading Club Hollywood...</p>
+          </div>
+        </div>
+      )}
+
       {/* Background Image with Video Frame */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"

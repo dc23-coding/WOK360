@@ -1,9 +1,13 @@
 // sections/DarkHallway.jsx
 import { useState } from "react";
 import RoomSection from "../components/RoomSection";
+import { useZoneContent } from "../hooks/useZoneContent";
 
 export default function DarkHallway({ mode, onToggleMode, onNavigate }) {
   const [activeNav, setActiveNav] = useState(0);
+  
+  // Fetch Kazmo Mansion Dark Wing content
+  const { content, featuredContent, loading } = useZoneContent('kazmo', 'dark');
 
   const navItems = [
     { label: "Private Bedroom", action: "scroll", target: "dark-bedroom" },

@@ -1,9 +1,13 @@
 // src/sections/LightHallway.jsx
 import { useState } from "react";
 import RoomSection from "../components/RoomSection";
+import { useZoneContent } from "../hooks/useZoneContent";
 
 export default function LightHallway({ mode, onToggleMode, onNavigate }) {
   const [activeNav, setActiveNav] = useState(0);
+  
+  // Fetch Kazmo Mansion Light Wing content
+  const { content, featuredContent, loading } = useZoneContent('kazmo', 'light');
 
   const navItems = [
     { label: "Calm Bedroom", action: "scroll", target: "light-bedroom" },

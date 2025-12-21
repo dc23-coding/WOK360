@@ -22,16 +22,21 @@ if (!clerkPubKey) {
   throw new Error("Missing VITE_CLERK_PUBLISHABLE_KEY in .env.local");
 }
 
-// Ensure window.location.origin is properly set
-const origin = typeof window !== 'undefined' ? window.location.origin : '';
+// Ensure window.location.origin is properly set with fallback
+const getOrigin = () => {
+  if (typeof window === 'undefined') return 'http://localhost:3001';
+  return window.location.origin || 'http://localhost:3001';
+};
+
+const origin = getOrigin();
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <ClerkProvider 
       publishableKey={clerkPubKey}
-      fallbackRedirectUrl={origin + "/"}
-      signInUrl={origin + "/"}
-      signUpUrl={origin + "/"}
+      fallbackRedirectUrl="/"
+      signInUrl="/"
+      signUpUrl="/"
     >
       <ClerkAuthProvider>
         <AppRouter />

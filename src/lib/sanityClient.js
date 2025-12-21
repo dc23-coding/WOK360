@@ -2,12 +2,19 @@
 import { createClient } from '@sanity/client';
 import { createImageUrlBuilder } from '@sanity/image-url';
 
+// Determine if we're in production
+const isProduction = import.meta.env.PROD;
+const hasToken = !!import.meta.env.VITE_SANITY_AUTH_TOKEN;
+
 export const sanityClient = createClient({
   projectId: import.meta.env.VITE_SANITY_PROJECT_ID || 'lp1si6d4',
   dataset: import.meta.env.VITE_SANITY_DATASET || 'production',
   apiVersion: '2024-01-01',
-  useCdn: false, // Use direct API for authenticated requests with private datasets
-  token: import.meta.env.VITE_SANITY_AUTH_TOKEN, // Required for private dataset reads
+  // Use CDN in production for better performance and CORS handling
+  // Only use direct API if we have a token for authenticated requests
+  useCdn: isProduction && !hasToken,
+  token: import.meta.env.VITE_SANITY_AUTH_TOKEN, // Optional - for admin operations
+  perspective: 'published', // Always fetch published data (skip drafts)
 });
 
 // Helper for generating image URLs with transformations

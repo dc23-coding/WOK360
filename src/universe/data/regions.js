@@ -11,7 +11,7 @@ export const regions = [
     status: "active",
     requiredAccess: "authenticated", // Login required - gold-plated signin
     zoneCode: "1000", // Mansion zone code
-    thumbnail: "/mansionThumb.png",
+    thumbnail: null, // Add actual thumbnail later
     coordinates: { lat: 34.05, lng: -118.25 },
     features: [
       "Live Sessions with Professor Cle",
@@ -32,7 +32,7 @@ export const regions = [
     requiredAccess: "public", // Changed to "public" so anyone can visit and see preview
     zoneCode: "2000", // Shadow Market zone code
     allowWalletAuth: true, // Enable crypto wallet authentication
-    thumbnail: "/shadowMarketThumb.png",
+    thumbnail: null, // Add actual thumbnail later
     coordinates: { lat: 35.68, lng: 139.65 },
     features: [
       "Crypto DEX (Decentralized Exchange) - Preview",
@@ -52,7 +52,7 @@ export const regions = [
     status: "active",
     requiredAccess: "none", // No login required - enhanced for logged-in users
     zoneCode: "3000", // Club Hollywood zone code
-    thumbnail: "/clubHollywoodThumb.png",
+    thumbnail: null, // Add actual thumbnail later
     coordinates: { lat: 34.10, lng: -118.35 },
     features: [
       "Live Content Viewing",
@@ -71,7 +71,7 @@ export const regions = [
     description: "A sprawling complex of recording studios, production rooms, and collaboration spaces. Where music and video content come to life.",
     status: "active",
     requiredAccess: "premium",
-    thumbnail: "/studioBeltThumb.png",
+    thumbnail: null, // Add actual thumbnail later
     coordinates: { lat: 40.75, lng: -73.99 },
     features: [
       "Multi-track Recording Studios",
@@ -91,7 +91,7 @@ export const regions = [
     requiredAccess: "none", // Free access - premium for tracking
     zoneCode: "4000", // Chakra Center zone code
     premiumFeatures: ["Health Tracking", "Personalized AI Plans", "Progress Analytics"],
-    thumbnail: "/gardenRingThumb.png",
+    thumbnail: null, // Add actual thumbnail later
     coordinates: { lat: 51.51, lng: -0.13 },
     features: [
       "Binaural Sounds Library",

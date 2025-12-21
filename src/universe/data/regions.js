@@ -28,19 +28,19 @@ export const regions = [
     name: "Shadow Market",
     district: "Exchange District",
     description: "The decentralized marketplace for crypto trading, real estate listings, and real-world assets. Trade on the DEX, invest in tokenized properties, and access exclusive RWA opportunities.",
-    status: "active",
-    requiredAccess: "authenticated", // Login required - separate user base
+    status: "preview", // Changed from "active" to "preview"
+    requiredAccess: "public", // Changed to "public" so anyone can visit and see preview
     zoneCode: "2000", // Shadow Market zone code
     allowWalletAuth: true, // Enable crypto wallet authentication
     thumbnail: "/shadowMarketThumb.png",
     coordinates: { lat: 35.68, lng: 139.65 },
     features: [
-      "Crypto DEX (Decentralized Exchange)",
-      "Real Estate Listings & Tokenization",
-      "Real-World Assets (RWA) Marketplace",
-      "Property Investment Opportunities",
-      "Secure Blockchain Transactions",
-      "NFT & Digital Asset Trading"
+      "Crypto DEX (Decentralized Exchange) - Preview",
+      "Chart Analysis Tools - In Development",
+      "Real Estate Listings & Tokenization - Coming Soon",
+      "Real-World Assets (RWA) Marketplace - Coming Soon",
+      "Property Investment Opportunities - Coming Soon",
+      "Secure Blockchain Transactions"
     ],
     entryPoint: "/world/shadow-market"
   },

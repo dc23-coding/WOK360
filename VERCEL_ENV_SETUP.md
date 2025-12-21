@@ -38,8 +38,11 @@ VITE_SUPABASE_ANON_KEY=sb_publishable_UskzL7fnOFNA0-PQDi9sDA_BR8XOogJ
 VITE_SANITY_PROJECT_ID=lp1si6d4
 VITE_SANITY_DATASET=production
 VITE_USE_SANITY=true
-VITE_SANITY_AUTH_TOKEN=skBJMJj3BVMxuBm4AziCKDFPL99n4dyWlyzPtjpVZET7P4g1JHhQeUpBs7LxscWlb4QuIugdXCgk5DdPPjXzFLcIqhoedzwSUoEDYDsiGUgShZ2yCzQTJTpk1aK4fWxaE6DSsvk2rNiVAP3zlUhaVpyX8RBirwsaAgcBXkrO8y5GNO1NhXIw
+VITE_SANITY_AUTH_TOKEN=<GET_FROM_SANITY_DASHBOARD>
 ```
+
+**⚠️ SECURITY NOTE:** Never commit actual tokens to Git. Get your token from:
+https://www.sanity.io/manage/personal/project/lp1si6d4/api/tokens
 
 ## After Adding Variables
 

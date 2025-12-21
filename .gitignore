@@ -5,3 +5,11 @@ node_modules/
 dist/
 vite.config.*
 .DS_Store
+
+# Security: Never commit these files
+SECURITY_FIX.sh
+add-cors.js
+
+# Temp/backup files
+*.backup.*
+*.old

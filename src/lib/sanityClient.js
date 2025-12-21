@@ -1,6 +1,6 @@
 // src/lib/sanityClient.js
 import { createClient } from '@sanity/client';
-import imageUrlBuilder from '@sanity/image-url';
+import { createImageUrlBuilder } from '@sanity/image-url';
 
 export const sanityClient = createClient({
   projectId: import.meta.env.VITE_SANITY_PROJECT_ID || 'lp1si6d4',
@@ -11,7 +11,7 @@ export const sanityClient = createClient({
 });
 
 // Helper for generating image URLs with transformations
-const builder = imageUrlBuilder(sanityClient);
+const builder = createImageUrlBuilder(sanityClient);
 
 export function urlFor(source) {
   return builder.image(source);

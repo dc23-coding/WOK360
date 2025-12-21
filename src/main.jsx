@@ -29,8 +29,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <ClerkProvider 
       publishableKey={clerkPubKey}
-      afterSignInUrl={origin + "/"}
-      afterSignUpUrl={origin + "/"}
+      fallbackRedirectUrl={origin + "/"}
       signInUrl={origin + "/"}
       signUpUrl={origin + "/"}
     >

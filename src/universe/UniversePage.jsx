@@ -8,10 +8,11 @@ import { regions } from "./data/regions";
 import { requiresAuthentication } from "../lib/zoneAccessControl";
 import RegionCard from "./components/RegionCard";
 import MapGlobe from "./components/MapGlobe";
+import OrbitalNavigator from "./components/OrbitalNavigator";
 
 export default function UniversePage({ isPremium, onEnterWorld }) {
   const { user } = useSupabaseAuth();
-  const [viewMode, setViewMode] = useState("grid"); // "grid" | "globe"
+  const [viewMode, setViewMode] = useState("orbit"); // "grid" | "globe" | "orbit"
 
   const handleWorldClick = (worldId) => {
     const region = regions.find(r => r.id === worldId);
@@ -63,6 +64,17 @@ export default function UniversePage({ isPremium, onEnterWorld }) {
           <div className="mt-4 sm:mt-6 inline-flex items-center rounded-full bg-slate-800/50 backdrop-blur px-1 py-1 border border-slate-700 touch-manipulation">
             <button
               type="button"
+              onClick={() => setViewMode("orbit")}
+              className={`px-3 sm:px-4 py-2 min-w-[80px] sm:min-w-0 rounded-full text-xs sm:text-sm transition ${
+                viewMode === "orbit"
+                  ? "bg-cyan-500 text-white shadow-lg"
+                  : "text-slate-400 hover:text-white active:text-cyan-300"
+              }`}
+            >
+              🪐 Orbit
+            </button>
+            <button
+              type="button"
               onClick={() => setViewMode("grid")}
               className={`px-3 sm:px-4 py-2 min-w-[80px] sm:min-w-0 rounded-full text-xs sm:text-sm transition ${
                 viewMode === "grid"
@@ -70,7 +82,7 @@ export default function UniversePage({ isPremium, onEnterWorld }) {
                   : "text-slate-400 hover:text-white active:text-cyan-300"
               }`}
             >
-              Grid View
+              Grid
             </button>
             <button
               type="button"
@@ -81,7 +93,7 @@ export default function UniversePage({ isPremium, onEnterWorld }) {
                   : "text-slate-400 hover:text-white active:text-cyan-300"
               }`}
             >
-              Globe View
+              Globe
             </button>
           </div>
         </div>
@@ -90,7 +102,15 @@ export default function UniversePage({ isPremium, onEnterWorld }) {
       {/* Main Content */}
       <main className="relative z-10 px-4 sm:px-6 md:px-12 pb-16 sm:pb-20">
         <div className="max-w-7xl mx-auto">
-          {viewMode === "grid" ? (
+          {viewMode === "orbit" ? (
+            <div className="min-h-[600px] sm:min-h-[700px]">
+              <OrbitalNavigator
+                regions={visibleRegions}
+                onSelectZone={handleWorldClick}
+                isPremium={isPremium}
+              />
+            </div>
+          ) : viewMode === "grid" ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {visibleRegions.map((region, idx) => {
                 // Show as accessible unless it's premium and user doesn't have premium

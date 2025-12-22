@@ -16,7 +16,7 @@ export default function VibePlayer({ variant = "dark", mode = "vod", locked = fa
   useEffect(() => {
     console.log(`[VibePlayer] Fetching content for roomId: ${roomId}`);
     sanityClient.fetch(
-      `*[_type == "mediaContent" && room == $roomId] | order(_createdAt desc) {
+      `*[_type == "mediaContent" && room == $roomId && defined(mediaFile.asset)] | order(_createdAt desc) {
         _id,
         title,
         subtitle,
@@ -48,6 +48,7 @@ export default function VibePlayer({ variant = "dark", mode = "vod", locked = fa
         isDark ? "border-cyan-500/30 bg-slate-900/80" : "border-purple-500/30 bg-slate-900/80"
       }`}>
         <p className="text-white/60">Loading content...</p>
+        <p className="text-xs text-white/40 mt-2">Querying: {roomId}</p>
       </div>
     );
   }
@@ -58,7 +59,9 @@ export default function VibePlayer({ variant = "dark", mode = "vod", locked = fa
         isDark ? "border-cyan-500/30 bg-slate-900/80" : "border-purple-500/30 bg-slate-900/80"
       }`}>
         <p className="text-white/60">No content assigned to this player yet.</p>
-        <p className="text-xs text-white/40 mt-2">Use the Control Room to add content</p>
+        <p className="text-xs text-white/40 mt-2">Room ID: {roomId}</p>
+        <p className="text-xs text-white/40 mt-1">Use the Control Room in Dark Hallway to assign content</p>
+        <p className="text-xs text-amber-400 mt-2">🎛️ Go to: Dark Hallway → Content Control Room → Manage → Assign tracks to "🎭 Main Stage"</p>
       </div>
     );
   }

@@ -70,18 +70,25 @@ export default function AdminContentManager() {
   const updateContentLocation = async (contentId, newRoom) => {
     setUpdating(contentId);
     try {
-      await sanityClient
+      console.log(`[AdminContentManager] Updating ${contentId} to room: ${newRoom}`);
+      
+      const result = await sanityClient
         .patch(contentId)
         .set({ room: newRoom })
         .commit();
+      
+      console.log(`[AdminContentManager] Successfully updated:`, result);
       
       // Update local state
       setContent(prev => prev.map(item => 
         item._id === contentId ? { ...item, room: newRoom } : item
       ));
+      
+      // Show success feedback
+      alert(`✅ Content assigned to ${newRoom}\n\nNow check the player in that room!`);
     } catch (err) {
       console.error("Failed to update location:", err);
-      alert("Failed to update location");
+      alert(`❌ Failed to update location: ${err.message}`);
     } finally {
       setUpdating(null);
     }
@@ -309,13 +316,19 @@ export default function AdminContentManager() {
                     {/* Location Selector */}
                     <div className="mt-3">
                       <label className="text-[10px] text-cyan-400/70 uppercase tracking-wide block mb-1">
-                        Display Location:
+                        Display Location: {item.room ? (
+                          <span className="text-green-400 ml-2">✓ Assigned</span>
+                        ) : (
+                          <span className="text-amber-400 ml-2">⚠ Not Published</span>
+                        )}
                       </label>
                       <select
                         value={item.room || ""}
                         onChange={(e) => updateContentLocation(item._id, e.target.value)}
                         disabled={updating === item._id}
-                        className="text-xs bg-black/50 border border-cyan-500/30 rounded px-2 py-1 text-white focus:outline-none focus:border-cyan-500"
+                        className={`text-xs bg-black/50 border rounded px-2 py-1 text-white focus:outline-none focus:border-cyan-500 ${
+                          item.room ? 'border-green-500/50' : 'border-amber-500/50'
+                        }`}
                       >
                         <option value="">-- Not Published --</option>
                         <option value="music-room">🎵 Music Room</option>
@@ -331,6 +344,11 @@ export default function AdminContentManager() {
                           <option value="club-dance-floor">🕺 Dance Floor</option>
                         </optgroup>
                       </select>
+                      {item.room && (
+                        <p className="text-[9px] text-green-400/60 mt-1">
+                          🎯 Visible in {item.room} player
+                        </p>
+                      )}
                     </div>
                   </div>
 

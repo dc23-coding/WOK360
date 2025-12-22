@@ -27,10 +27,11 @@ export default function LightBedroom({ onToggleMode }) {
     { id: 2, title: "Coinbase Learn", category: "tutorial", url: "https://coinbase.com/learn", type: "resource" },
     { id: 3, title: "CryptoZombies", category: "interactive", url: "https://cryptozombies.io", type: "resource" },
     { id: 4, title: "Web3 University", category: "course", url: "https://web3.university", type: "resource" },
-    { id: 5, title: "Coinbase", category: "signup", url: "YOUR_COINBASE_REFERRAL_LINK_HERE", type: "signup" },
-    { id: 6, title: "Binance", category: "signup", url: "YOUR_BINANCE_REFERRAL_LINK_HERE", type: "signup" },
-    { id: 7, title: "Kraken", category: "signup", url: "YOUR_KRAKEN_REFERRAL_LINK_HERE", type: "signup" },
-    { id: 8, title: "MetaMask", category: "signup", url: "YOUR_METAMASK_REFERRAL_LINK_HERE", type: "signup" },
+    { id: 5, title: "Robinhood", category: "signup", url: "https://join.robinhood.com/davidc630", type: "signup" },
+    { id: 6, title: "Coinbase", category: "signup", url: "YOUR_COINBASE_REFERRAL_LINK_HERE", type: "signup" },
+    { id: 7, title: "Binance", category: "signup", url: "YOUR_BINANCE_REFERRAL_LINK_HERE", type: "signup" },
+    { id: 8, title: "Kraken", category: "signup", url: "YOUR_KRAKEN_REFERRAL_LINK_HERE", type: "signup" },
+    { id: 9, title: "MetaMask", category: "signup", url: "YOUR_METAMASK_REFERRAL_LINK_HERE", type: "signup" },
   ]);
   const [donationAmount, setDonationAmount] = useState("10");
 

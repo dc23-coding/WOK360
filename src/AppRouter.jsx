@@ -2,11 +2,13 @@
 // World of Karma 360 - Universe Router
 // Users enter directly to Universe Map - no global authentication required
 // Authentication is zone-specific: Kazmo Mansion & Shadow Market only
-import { useState, Suspense, lazy } from "react";
+import { useState, Suspense, lazy, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSupabaseAuth } from "./context/ClerkAuthContext";
+import { ZoneProvider, useZoneContext } from "./context/ZoneContext";
 import { CleAssistant } from "./ai/cle";
 import ContentUploader from "./admin/ContentUploader";
+import GlobalMediaPlayer from "./components/GlobalMediaPlayer";
 
 import UniversePage from "./universe/UniversePage";
 
@@ -16,14 +18,30 @@ const KazmoMansionWorld = lazy(() => import("./worlds/kazmoMansion/KazmoMansionW
 const ShadowMarketWorld = lazy(() => import("./worlds/shadowMarket/ShadowMarketWorld"));
 const StudioBeltWorld = lazy(() => import("./worlds/studioBelt/StudioBeltWorld"));
 
-export default function AppRouter() {
+function AppRouterContent() {
   const { user, signOut } = useSupabaseAuth();
+  const { currentZone, currentWing, setCurrentZone, setCurrentWing } = useZoneContext();
 
   // Premium logic
   const isPremium = user?.app_metadata?.premium === true;
 
   // Universe state - users start here without authentication
   const [activeWorld, setActiveWorld] = useState(null); // null | "kazmo-mansion" | "shadow-market" | "club-hollywood" etc-------------------------------------
+  
+  // Update zone context when active world changes
+  useEffect(() => {
+    if (!activeWorld) {
+      setCurrentZone(null);
+      setCurrentWing(null);
+    } else if (activeWorld === 'kazmo-mansion') {
+      setCurrentZone('kazmo');
+    } else if (activeWorld === 'club-hollywood') {
+      setCurrentZone('clubHollywood');
+    } else if (activeWorld === 'shadow-market') {
+      setCurrentZone('shadowMarket');
+    }
+  }, [activeWorld, setCurrentZone, setCurrentWing]);
+  
   // Navigate to a specific world
   // ---------------------------------------------------------------------------
   const handleEnterWorld = (worldId) => {
@@ -143,9 +161,18 @@ export default function AppRouter() {
       {activeWorld && <CleAssistant />}
 
       {/* ---------------------------------------------------------------------------
-          ADMIN CONTENT UPLOADER - Only visible to admins
+          GLOBAL MEDIA PLAYER - Persistent player for audio/video
       --------------------------------------------------------------------------- */}
-      <ContentUploader />
+      <GlobalMediaPlayer />
+
+      {/* ---------------------------------------------------------------------------
+          ADMIN CONTENT UPLOADER - Now integrated into Control Room
+          (Kept here for backwards compatibility but hidden)
+      --------------------------------------------------------------------------- */}
+      {/* <ContentUploader 
+        currentZone={currentZone}
+        currentWing={currentWing}
+      /> */}
 
       {/* ---------------------------------------------------------------------------
           GLOBAL UNIVERSE MAP BUTTON - Available in all worlds
@@ -170,5 +197,14 @@ export default function AppRouter() {
         </button>
       )}
     </main>
+  );
+}
+
+// Wrap with ZoneProvider for context access
+export default function AppRouter() {
+  return (
+    <ZoneProvider>
+      <AppRouterContent />
+    </ZoneProvider>
   );
 }

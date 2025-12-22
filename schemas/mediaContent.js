@@ -51,6 +51,27 @@ export const mediaContentSchema = {
       validation: (Rule) => Rule.required(),
     },
     {
+      name: 'room',
+      title: 'Display Location',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'Music Room', value: 'music-room' },
+          { title: 'Studio', value: 'studio' },
+          { title: 'Bedroom', value: 'bedroom' },
+          { title: 'Photo Gallery', value: 'photo-gallery' },
+          { title: 'Merch Shop', value: 'merch-shop' },
+          { title: 'Playroom (Dark)', value: 'playroom' },
+          { title: 'Featured/Homepage', value: 'featured' },
+          { title: 'Club Hollywood - Main Stage', value: 'club-main-stage' },
+          { title: 'Club Hollywood - VIP Lounge', value: 'club-vip' },
+          { title: 'Club Hollywood - Dance Floor', value: 'club-dance-floor' },
+        ],
+      },
+      description: 'Where should this content appear?',
+      validation: (Rule) => Rule.required(),
+    },
+    {
       name: 'contentType',
       title: 'Content Type',
       type: 'string',
@@ -80,7 +101,7 @@ export const mediaContentSchema = {
       options: {
         hotspot: true, // Enables focal point selection
       },
-      validation: (Rule) => Rule.required(),
+      description: 'Optional thumbnail image for the content',
     },
     {
       name: 'duration',

@@ -4,6 +4,7 @@ import AppRouter from "./AppRouter";
 import "./index.css";
 import { ClerkProvider } from "@clerk/clerk-react";
 import { ClerkAuthProvider } from "./context/ClerkAuthContext";
+import { MediaPlayerProvider } from "./context/MediaPlayerContext";
 
 // Ensure URL methods are available globally for Clerk
 if (typeof window !== 'undefined') {
@@ -39,7 +40,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       signUpUrl="/"
     >
       <ClerkAuthProvider>
-        <AppRouter />
+        <MediaPlayerProvider>
+          <AppRouter />
+        </MediaPlayerProvider>
       </ClerkAuthProvider>
     </ClerkProvider>
   </React.StrictMode>

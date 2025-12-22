@@ -1,6 +1,7 @@
 // src/worlds/kazmoMansion/KazmoMansionWorld.jsx
 import { useState, useEffect, Suspense, lazy } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useZoneContext } from "../../context/ZoneContext";
 import HeroDoor from "../../sections/HeroDoor";
 
 // Lazy-loaded mansion rooms and hallways
@@ -22,6 +23,7 @@ export default function KazmoMansionWorld({
   onExitWorld,
   initialMode = "light" 
 }) {
+  const { setCurrentWing } = useZoneContext();
   const [adminUnlocked, setAdminUnlocked] = useState(false);
   const [hasEnteredMansion, setHasEnteredMansion] = useState(false);
   const [activeRoom, setActiveRoom] = useState(null);
@@ -63,7 +65,9 @@ export default function KazmoMansionWorld({
     if (typeof window !== "undefined") {
       window.localStorage.setItem("kazmoMansion_mode", mode);
     }
-  }, [mode]);
+    // Update zone context so ContentUploader knows current wing
+    setCurrentWing(mode);
+  }, [mode, setCurrentWing]);
 
   // Mode toggle with premium gate
   const handleToggleMode = () => {

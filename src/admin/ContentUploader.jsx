@@ -10,7 +10,8 @@ import { Label } from "../components/ui/label";
 
 const ADMIN_CODE = import.meta.env.VITE_ADMIN_ACCESS_CODE || "3104";
 
-export default function ContentUploader() {
+// Props allow zone/wing context to be passed from parent
+export default function ContentUploader({ currentZone = null, currentWing = null, onUploadComplete = null }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [showKeypad, setShowKeypad] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -29,14 +30,23 @@ export default function ContentUploader() {
       setShowKeypad(false);
     }
   };
+  // Auto-detect access level based on zone/wing
+  // Light Wing = Premium, Dark Wing = Public, Shadow Market = Premium
+  const getDefaultAccessLevel = () => {
+    if (currentZone === 'shadowMarket') return 'premium';
+    if (currentWing === 'light') return 'premium';
+    return 'public';
+  };
+
   const [formData, setFormData] = useState({
     title: "",
     subtitle: "",
     description: "",
-    zone: "kazmo",
-    wing: "light",
+    zone: currentZone || "kazmo",
+    wing: currentWing || "light",
+    room: "music-room",
     contentType: "video",
-    accessLevel: "public",
+    accessLevel: getDefaultAccessLevel(),
     featured: false,
     isLive: false,
     duration: "",
@@ -97,23 +107,90 @@ export default function ContentUploader() {
     }));
   };
 
-  const handleFileChange = (e, fileType) => {
+  const handleFileChange = async (e, fileType) => {
     const file = e.target.files[0];
-    if (file) {
-      if (fileType === "media") {
-        setMediaFile(file);
-      } else if (fileType === "thumbnail") {
-        setThumbnailFile(file);
+    if (!file) return;
+
+    // Validate image files before setting state
+    if (fileType === "thumbnail") {
+      const validImageTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+      if (!validImageTypes.includes(file.type)) {
+        setUploadStatus({
+          type: "error",
+          message: `Invalid format: ${file.type}. Only JPG, PNG, GIF, WebP allowed.`
+        });
+        e.target.value = ""; // Clear the input
+        return;
       }
+
+      // Check file signature (magic bytes) for common corruptions
+      try {
+        const buffer = await file.slice(0, 4).arrayBuffer();
+        const bytes = new Uint8Array(buffer);
+        const hex = Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+        
+        // Valid image signatures
+        const validSignatures = [
+          'ffd8ff',   // JPEG
+          '89504e47', // PNG
+          '47494638', // GIF
+          '52494646', // WEBP (RIFF)
+        ];
+        
+        const isValid = validSignatures.some(sig => hex.startsWith(sig));
+        if (!isValid) {
+          setUploadStatus({
+            type: "error",
+            message: "File is corrupted or not a real image. Try a different file."
+          });
+          e.target.value = "";
+          return;
+        }
+      } catch (err) {
+        console.error('File signature check failed:', err);
+      }
+
+      // Additional check: verify file can be read as an image
+      try {
+        await new Promise((resolve, reject) => {
+          const img = new Image();
+          const timeout = setTimeout(() => reject(new Error("Image load timeout")), 5000);
+          img.onload = () => {
+            clearTimeout(timeout);
+            resolve();
+          };
+          img.onerror = () => {
+            clearTimeout(timeout);
+            reject(new Error("File is not a valid image"));
+          };
+          img.src = URL.createObjectURL(file);
+        });
+        setThumbnailFile(file);
+        setUploadStatus(null); // Clear any previous errors
+      } catch (err) {
+        setUploadStatus({
+          type: "error",
+          message: "Cannot load image. File may be corrupted. Try converting to JPG."
+        });
+        e.target.value = ""; // Clear the input
+        return;
+      }
+    } else if (fileType === "media") {
+      setMediaFile(file);
     }
   };
 
   const uploadFile = async (file, fileType) => {
-    // Validate file type
+    // Validate file type and size
     if (fileType === "image") {
-      const validImageTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"];
+      const validImageTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
       if (!validImageTypes.includes(file.type)) {
         throw new Error(`Invalid image format: ${file.type}. Please use JPG, PNG, GIF, or WebP.`);
+      }
+      
+      // Check file size (max 10MB for images)
+      if (file.size > 10 * 1024 * 1024) {
+        throw new Error(`Image too large: ${(file.size / 1024 / 1024).toFixed(2)}MB. Maximum size is 10MB.`);
       }
     }
 
@@ -157,11 +234,21 @@ export default function ContentUploader() {
         mediaAssetId = await uploadFile(mediaFile, "file");
       }
 
-      // Upload thumbnail (optional)
+      // Upload thumbnail (optional, but with error handling)
       let thumbnailAssetId = null;
       if (thumbnailFile) {
-        setUploadStatus({ type: "loading", message: "Uploading thumbnail..." });
-        thumbnailAssetId = await uploadFile(thumbnailFile, "image");
+        try {
+          setUploadStatus({ type: "loading", message: "Uploading thumbnail..." });
+          thumbnailAssetId = await uploadFile(thumbnailFile, "image");
+        } catch (thumbError) {
+          console.error("Thumbnail upload failed:", thumbError);
+          // Show warning but continue - thumbnail is optional
+          setUploadStatus({ 
+            type: "warning", 
+            message: `Thumbnail upload failed: ${thumbError.message}. Continuing without thumbnail...` 
+          });
+          await new Promise(resolve => setTimeout(resolve, 2000)); // Brief pause to show message
+        }
       }
 
       // Create document in Sanity
@@ -173,6 +260,7 @@ export default function ContentUploader() {
         description: formData.description,
         zone: formData.zone,
         wing: formData.wing,
+        room: formData.room,
         contentType: formData.contentType,
         accessLevel: formData.accessLevel,
         featured: formData.featured,
@@ -210,16 +298,22 @@ export default function ContentUploader() {
 
       setUploadStatus({ type: "success", message: "Content uploaded successfully!" });
       
-      // Reset form
+      // Notify parent if callback provided
+      if (onUploadComplete) {
+        onUploadComplete();
+      }
+      
+      // Reset form but maintain zone/wing context
       setTimeout(() => {
         setFormData({
           title: "",
           subtitle: "",
           description: "",
-          zone: "kazmo",
-          wing: "light",
+          zone: currentZone || "kazmo",
+          wing: currentWing || "light",
+          room: "music-room",
           contentType: "video",
-          accessLevel: "public",
+          accessLevel: getDefaultAccessLevel(),
           featured: false,
           isLive: false,
           duration: "",
@@ -262,6 +356,26 @@ export default function ContentUploader() {
               <X className="w-5 h-5" />
             </button>
           </div>
+
+          {/* Context Indicator - Shows where content will be uploaded */}
+          {currentZone && (
+            <div className="mb-4 p-3 rounded-lg bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border border-cyan-500/30">
+              <div className="flex items-center gap-2 text-sm">
+                <span className="text-cyan-400">📍 Uploading to:</span>
+                <span className="text-white font-semibold">
+                  {currentZone === 'kazmo' && 'Kazmo Mansion'}
+                  {currentZone === 'clubHollywood' && 'Club Hollywood'}
+                  {currentZone === 'shadowMarket' && 'Shadow Market'}
+                  {currentWing && ` • ${currentWing === 'light' ? 'Light Wing' : currentWing === 'dark' ? 'Dark Wing' : 'Both Wings'}`}
+                </span>
+              </div>
+              <div className="mt-1 text-xs text-gray-400">
+                Content will automatically be categorized for this zone
+                {formData.accessLevel === 'premium' && ' as premium content'}
+                {currentWing === 'light' && ' (Light Wing = Premium ✨)'}
+              </div>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Title */}
@@ -311,7 +425,7 @@ export default function ContentUploader() {
             {/* Zone */}
             <div>
               <Label htmlFor="zone" className="text-gray-300">
-                Zone *
+                Zone * {currentZone && <span className="text-xs text-cyan-400">(auto-detected)</span>}
               </Label>
               <select
                 id="zone"
@@ -319,7 +433,8 @@ export default function ContentUploader() {
                 value={formData.zone}
                 onChange={handleInputChange}
                 required
-                className="w-full px-3 py-2 bg-black/50 border border-cyan-500/30 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                disabled={!!currentZone}
+                className="w-full px-3 py-2 bg-black/50 border border-cyan-500/30 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 <option value="kazmo">Kazmo Mansion</option>
                 <option value="clubHollywood">Club Hollywood</option>
@@ -330,7 +445,7 @@ export default function ContentUploader() {
             {/* Wing */}
             <div>
               <Label htmlFor="wing" className="text-gray-300">
-                Wing/Mode *
+                Wing/Mode * {currentWing && <span className="text-xs text-cyan-400">(auto-detected)</span>}
               </Label>
               <select
                 id="wing"
@@ -338,12 +453,42 @@ export default function ContentUploader() {
                 value={formData.wing}
                 onChange={handleInputChange}
                 required
-                className="w-full px-3 py-2 bg-black/50 border border-cyan-500/30 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                disabled={!!currentWing}
+                className="w-full px-3 py-2 bg-black/50 border border-cyan-500/30 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 <option value="light">Light Wing</option>
                 <option value="dark">Dark Wing</option>
                 <option value="both">Both</option>
               </select>
+            </div>
+
+            {/* Room/Display Location */}
+            <div>
+              <Label htmlFor="room" className="text-gray-300">
+                Display Location * <span className="text-xs text-amber-400">(where it appears)</span>
+              </Label>
+              <select
+                id="room"
+                name="room"
+                value={formData.room}
+                onChange={handleInputChange}
+                required
+                className="w-full px-3 py-2 bg-black/50 border border-cyan-500/30 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              >
+                <option value="music-room">🎵 Music Room</option>
+                <option value="studio">🎙️ Studio</option>
+                <option value="bedroom">🛏️ Bedroom</option>
+                <option value="photo-gallery">🖼️ Photo Gallery</option>
+                <option value="merch-shop">🛍️ Merch Shop</option>
+                <option value="playroom">🎮 Playroom (Dark)</option>
+                <option value="featured">⭐ Featured/Homepage</option>
+                <optgroup label="Club Hollywood">
+                  <option value="club-main-stage">🎭 Main Stage (Live Performances)</option>
+                  <option value="club-vip">💎 VIP Lounge</option>
+                  <option value="club-dance-floor">🕺 Dance Floor</option>
+                </optgroup>
+              </select>
+              <p className="text-xs text-gray-500 mt-1">Content will display in this room when users visit</p>
             </div>
 
             {/* Content Type */}
@@ -479,14 +624,13 @@ export default function ContentUploader() {
             {/* Thumbnail Upload */}
             <div>
               <Label htmlFor="thumbnailFile" className="text-gray-300">
-                Thumbnail Image *
+                Thumbnail Image (optional)
               </Label>
               <input
                 type="file"
                 id="thumbnailFile"
                 accept="image/*"
                 onChange={(e) => handleFileChange(e, "thumbnail")}
-                required
                 className="w-full px-3 py-2 bg-black/50 border border-cyan-500/30 rounded-md text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-cyan-500 file:text-white hover:file:bg-cyan-600"
               />
               {thumbnailFile && (
@@ -502,15 +646,18 @@ export default function ContentUploader() {
                     ? "bg-green-500/20 text-green-400"
                     : uploadStatus.type === "error"
                     ? "bg-red-500/20 text-red-400"
+                    : uploadStatus.type === "warning"
+                    ? "bg-amber-500/20 text-amber-400"
                     : "bg-cyan-500/20 text-cyan-400"
                 }`}
               >
                 {uploadStatus.type === "success" && <Check className="w-5 h-5" />}
                 {uploadStatus.type === "error" && <AlertCircle className="w-5 h-5" />}
+                {uploadStatus.type === "warning" && <AlertCircle className="w-5 h-5" />}
                 {uploadStatus.type === "loading" && (
                   <div className="w-5 h-5 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
                 )}
-                <span>{uploadStatus.message}</span>
+                <span className="text-sm">{uploadStatus.message}</span>
               </div>
             )}
 

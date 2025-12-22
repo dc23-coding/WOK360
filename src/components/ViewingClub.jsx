@@ -458,7 +458,12 @@ export default function ViewingClub({ variant = "dark", mode = "vod" }) {
 
       {/* Vibe Player - Music Selection */}
       <div className="p-6 border-t border-cyan-500/10">
-        <VibePlayer variant={variant} mode={mode} locked={mode === "live"} />
+        <VibePlayer 
+          variant={variant} 
+          mode={mode} 
+          locked={mode === "live"} 
+          roomId="club-main-stage"
+        />
       </div>
 
       {/* Ambient Background */}

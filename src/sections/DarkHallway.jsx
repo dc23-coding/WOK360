@@ -1,23 +1,39 @@
 // sections/DarkHallway.jsx
 import { useState } from "react";
 import RoomSection from "../components/RoomSection";
+import AdminContentManager from "../components/AdminContentManager";
 import { useZoneContent } from "../hooks/useZoneContent";
 
 export default function DarkHallway({ mode, onToggleMode, onNavigate }) {
+  const [showControlRoom, setShowControlRoom] = useState(false);
   const [activeNav, setActiveNav] = useState(0);
   
   // Fetch Kazmo Mansion Dark Wing content
   const { content, featuredContent, loading } = useZoneContent('kazmo', 'dark');
 
   const navItems = [
+    { label: "Content Control Room", action: "toggle-manager", target: null },
+    { label: "← Back to Light Wing", action: "toggle-mode", target: null },
     { label: "Private Bedroom", action: "scroll", target: "dark-bedroom" },
     { label: "Exclusive Studio", action: "scroll", target: "dark-playroom" },
     { label: "Ask Cle AI", action: "none", info: "Available in all dark rooms" },
-    { label: "Premium Features", action: "none", info: "Coming Soon" },
   ];
 
   return (
     <RoomSection bg="/Hallway_Dark.png" className="bg-black" >
+      {/* Admin Content Manager Overlay */}
+      {showControlRoom && (
+        <div className="absolute inset-0 z-50 bg-black/95 backdrop-blur-xl">
+          <button
+            onClick={() => setShowControlRoom(false)}
+            className="absolute top-4 right-4 px-4 py-2 bg-red-500/20 text-red-400 rounded-full text-sm hover:bg-red-500/30 transition"
+          >
+            ✕ Close Control Room
+          </button>
+          <AdminContentManager />
+        </div>
+      )}
+
       <div
         id="dark-hallway"
         className="flex w-full h-full items-center justify-between px-6 md:px-16"
@@ -28,7 +44,7 @@ export default function DarkHallway({ mode, onToggleMode, onNavigate }) {
             Night Wing
           </p>
           <h2 className="text-2xl md:text-3xl font-semibold">
-            Exclusive Stories
+            Admin Control Center
           </h2>
           <ul className="space-y-2 text-sm md:text-base">
             {navItems.map((item, index) => (
@@ -41,7 +57,11 @@ export default function DarkHallway({ mode, onToggleMode, onNavigate }) {
                 }`}
                 onClick={() => {
                   setActiveNav(index);
-                  if (item.action === "scroll" && item.target) {
+                  if (item.action === "toggle-manager") {
+                    setShowControlRoom(true);
+                  } else if (item.action === "toggle-mode") {
+                    onToggleMode();
+                  } else if (item.action === "scroll" && item.target) {
                     document.getElementById(item.target)?.scrollIntoView({ behavior: "smooth" });
                   }
                 }}

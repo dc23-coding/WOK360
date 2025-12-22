@@ -109,23 +109,34 @@ export default function ContentUploader() {
   };
 
   const uploadFile = async (file, fileType) => {
+    // Validate file type
+    if (fileType === "image") {
+      const validImageTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"];
+      if (!validImageTypes.includes(file.type)) {
+        throw new Error(`Invalid image format: ${file.type}. Please use JPG, PNG, GIF, or WebP.`);
+      }
+    }
+
     const formData = new FormData();
     formData.append("file", file);
 
     // Upload to Sanity assets
-    const response = await fetch(
-      `https://${import.meta.env.VITE_SANITY_PROJECT_ID}.api.sanity.io/v2021-03-25/assets/${fileType}s/${import.meta.env.VITE_SANITY_DATASET}`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${import.meta.env.VITE_SANITY_AUTH_TOKEN}`,
-        },
-        body: formData,
-      }
-    );
+    const url = `https://${import.meta.env.VITE_SANITY_PROJECT_ID}.api.sanity.io/v2021-03-25/assets/${fileType}s/${import.meta.env.VITE_SANITY_DATASET}`;
+    
+    console.log(`Uploading ${fileType}: ${file.name} (${file.type}) to ${url}`);
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${import.meta.env.VITE_SANITY_AUTH_TOKEN}`,
+      },
+      body: formData,
+    });
 
     if (!response.ok) {
-      throw new Error(`Failed to upload ${fileType}`);
+      const errorData = await response.json().catch(() => ({}));
+      console.error(`Upload failed for ${fileType}:`, errorData);
+      throw new Error(`Failed to upload ${fileType}: ${errorData.message || response.statusText}`);
     }
 
     const data = await response.json();
@@ -142,15 +153,16 @@ export default function ContentUploader() {
       let mediaAssetId = null;
       if (mediaFile && !formData.isLive) {
         setUploadStatus({ type: "loading", message: "Uploading media file..." });
-        mediaAssetId = await uploadFile(
-          mediaFile,
-          formData.contentType === "video" ? "file" : "file"
-        );
+        // Always use 'file' for media uploads (video, audio, etc.)
+        mediaAssetId = await uploadFile(mediaFile, "file");
       }
 
-      // Upload thumbnail
-      setUploadStatus({ type: "loading", message: "Uploading thumbnail..." });
-      const thumbnailAssetId = await uploadFile(thumbnailFile, "image");
+      // Upload thumbnail (optional)
+      let thumbnailAssetId = null;
+      if (thumbnailFile) {
+        setUploadStatus({ type: "loading", message: "Uploading thumbnail..." });
+        thumbnailAssetId = await uploadFile(thumbnailFile, "image");
+      }
 
       // Create document in Sanity
       setUploadStatus({ type: "loading", message: "Creating document..." });
@@ -167,14 +179,18 @@ export default function ContentUploader() {
         isLive: formData.isLive,
         duration: formData.duration,
         tags: formData.tags ? formData.tags.split(",").map((t) => t.trim()) : [],
-        thumbnail: {
+      };
+
+      // Only add thumbnail if uploaded
+      if (thumbnailAssetId) {
+        doc.thumbnail = {
           _type: "image",
           asset: {
             _type: "reference",
             _ref: thumbnailAssetId,
           },
-        },
-      };
+        };
+      }
 
       if (mediaAssetId) {
         doc.mediaFile = {
@@ -449,7 +465,7 @@ export default function ContentUploader() {
                 <input
                   type="file"
                   id="mediaFile"
-                  accept="video/*,audio/*"
+                  accept="video/*,audio/*,.mp4,.mp3,.wav,.m4a,.webm,.ogg,.aac,.flac"
                   onChange={(e) => handleFileChange(e, "media")}
                   required
                   className="w-full px-3 py-2 bg-black/50 border border-cyan-500/30 rounded-md text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-cyan-500 file:text-white hover:file:bg-cyan-600"

@@ -1,13 +1,10 @@
 // src/AppRouter.jsx
 // World of Karma 360 - Universe Router
-// Users enter directly to Universe Map - no global authentication required
-// Authentication is zone-specific: Kazmo Mansion & Shadow Market only
+// Authentication is zone-specific via access keys (4-digit codes)
 import { useState, Suspense, lazy, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { useSupabaseAuth } from "./context/ClerkAuthContext";
 import { ZoneProvider, useZoneContext } from "./context/ZoneContext";
 import { CleAssistant } from "./ai/cle";
-import ContentUploader from "./admin/ContentUploader";
 import GlobalMediaPlayer from "./components/GlobalMediaPlayer";
 
 import UniversePage from "./universe/UniversePage";
@@ -19,14 +16,10 @@ const ShadowMarketWorld = lazy(() => import("./worlds/shadowMarket/ShadowMarketW
 const StudioBeltWorld = lazy(() => import("./worlds/studioBelt/StudioBeltWorld"));
 
 function AppRouterContent() {
-  const { user, signOut } = useSupabaseAuth();
   const { currentZone, currentWing, setCurrentZone, setCurrentWing } = useZoneContext();
 
-  // Premium logic
-  const isPremium = user?.app_metadata?.premium === true;
-
   // Universe state - users start here without authentication
-  const [activeWorld, setActiveWorld] = useState(null); // null | "kazmo-mansion" | "shadow-market" | "club-hollywood" etc-------------------------------------
+  const [activeWorld, setActiveWorld] = useState(null); // null | "kazmo-mansion" | "shadow-market" | "club-hollywood" etc
   
   // Update zone context when active world changes
   useEffect(() => {
@@ -61,10 +54,7 @@ function AppRouterContent() {
           UNIVERSE MAP - Default view showing all worlds (always visible)
       --------------------------------------------------------------------------- */}
       {!activeWorld && (
-        <UniversePage
-          isPremium={isPremium}
-          onEnterWorld={handleEnterWorld}
-        />
+        <UniversePage onEnterWorld={handleEnterWorld} />
       )}
 
       {/* ---------------------------------------------------------------------------
@@ -104,11 +94,7 @@ function AppRouterContent() {
                 <div className="text-cyan-400 text-xl">Loading Kazmo Mansion...</div>
               </div>
             }>
-              <KazmoMansionWorld
-                isPremium={isPremium}
-                user={user}
-                onExitWorld={handleExitWorld}
-              />
+              <KazmoMansionWorld onExitWorld={handleExitWorld} />
             </Suspense>
           </motion.div>
         )}
@@ -146,10 +132,7 @@ function AppRouterContent() {
                 <div className="text-purple-400 text-xl">Loading Studio Belt...</div>
               </div>
             }>
-              <StudioBeltWorld
-                isPremium={isPremium}
-                onExitWorld={handleExitWorld}
-              />
+              <StudioBeltWorld onExitWorld={handleExitWorld} />
             </Suspense>
           </motion.div>
         )}
@@ -184,16 +167,6 @@ function AppRouterContent() {
           title="Return to Universe Map"
         >
           ← Universe Map
-        </button>
-      )}
-
-      {/* Sign out button */}
-      {user && (
-        <button
-          onClick={signOut}
-          className="fixed top-4 right-4 text-xs text-amber-200/80 hover:text-amber-50 z-[80]"
-        >
-          Sign out
         </button>
       )}
     </main>

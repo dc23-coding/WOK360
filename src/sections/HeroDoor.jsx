@@ -1,84 +1,42 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import RoomSection from "../components/RoomSection";
-import { useSupabaseAuth } from "../context/ClerkAuthContext";
-import { getUserByPersonalCode, MASTER_KEY } from "../lib/zoneAccessControl";
-import SignInForm from "../components/SignInForm";
-import SignUpForm from "../components/SignUpForm";
+import ZoneKeypad from "../components/ZoneKeypad";
+import { getCurrentUser, isAdmin } from "../lib/zoneAccessControl";
 
-export default function HeroDoor({
-  isSignedIn,
-  canEnter,
-  onKeypadAccess,
-  onEnterHouse,
-}) {
-  const { supabase } = useSupabaseAuth();
+export default function HeroDoor({ onEnterHouse, onAdminAccess }) {
   const [showKeypad, setShowKeypad] = useState(false);
-  const [showAuth, setShowAuth] = useState(false);
-  const [authTab, setAuthTab] = useState("signin"); // 'signin' | 'signup'
-  const [code, setCode] = useState("");
-  const [error, setError] = useState("");
-  const [showEnterConfirm, setShowEnterConfirm] = useState(false);
-  const [codeType, setCodeType] = useState(""); // 'master' | 'personal' | ''
-  const modalRef = useRef(null);
+  const [hasAccess, setHasAccess] = useState(false);
+  const [user, setUser] = useState(null);
 
-  // If user logs in via Supabase, close the auth tablet and show enter confirmation
+  // Check if user already has access on mount
   useEffect(() => {
-    if (isSignedIn && showAuth) {
-      setShowAuth(false);
-      setShowEnterConfirm(true);
+    const currentUser = getCurrentUser();
+    const adminStatus = isAdmin();
+    
+    if (currentUser || adminStatus) {
+      setHasAccess(true);
+      setUser(currentUser);
     }
-  }, [isSignedIn, showAuth]);
+  }, []);
 
-  // --- keypad handlers ---
-  const handleDigit = async (d) => {
-    setError("");
-    if (code.length >= 4) return;
-
-    const next = code + d;
-    setCode(next);
-
-    if (next.length === 4) {
-      // Check if it's the master key (admin access)
-      if (next === MASTER_KEY) {
-        setCodeType("master");
-        setTimeout(() => {
-          onKeypadAccess(); // Grant admin access
-          setShowKeypad(false);
-          setCode("");
-          setCodeType("");
-        }, 120);
-        return;
-      }
-      
-      // Check if it's a personal code (user shortcut)
-      const result = await getUserByPersonalCode(supabase, next);
-      
-      if (result.email) {
-        setCodeType("personal");
-        // Personal code found - auto-fill email in signin
-        setError(`Code recognized for ${result.email.substring(0, 3)}***`);
-        setTimeout(() => {
-          setShowKeypad(false);
-          setShowAuth(true);
-          setAuthTab("signin");
-          setCode("");
-          setCodeType("");
-          // You could auto-fill the email here if you modify SignInForm
-        }, 1500);
-      } else {
-        setError("Code not recognized");
-        setCodeType("");
-        setTimeout(() => setCode(""), 250);
-      }
-    }
+  const handleAccessGranted = (grantedUser) => {
+    setHasAccess(true);
+    setUser(grantedUser);
+    setShowKeypad(false);
   };
 
-  const handleClear = () => {
-    setCode("");
-    setError("");
+  const handleAdminAccess = () => {
+    onAdminAccess?.();
   };
 
-  const tabletIsZoomed = showKeypad || showAuth;
+  const handleEnterHouse = () => {
+    // Play doorbell sound
+    const doorbell = new Audio('/doorbell.mp3');
+    doorbell.volume = 0.4;
+    doorbell.play().catch(() => {/* ignore */});
+    
+    onEnterHouse();
+  };
 
   return (
     <RoomSection bg="/Frontdoor_Main.png" className="bg-black">
@@ -94,130 +52,81 @@ export default function HeroDoor({
           </p>
         </div>
 
-          {/* Enter confirmation after sign-in */}
-          {showEnterConfirm && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center">
-              <div className="absolute inset-0 bg-black/70" onClick={() => setShowEnterConfirm(false)} />
-              <div className="relative z-10 w-[300px] rounded-xl bg-black/95 border border-amber-300/80 p-5 shadow-[0_0_80px_rgba(252,211,77,0.9)] text-center">
-                <p className="text-amber-100 mb-4">Signed in — enter the house now?</p>
-                <div className="flex items-center justify-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowEnterConfirm(false);
-                      // Play doorbell sound
-                      const doorbell = new Audio('/doorbell.mp3');
-                      doorbell.volume = 0.4;
-                      doorbell.play().catch(() => {/* ignore */});
-                      
-                      try {
-                        onEnterHouse();
-                      } catch (e) {
-                        /* ignore */
-                      }
-                    }}
-                    className="px-4 py-2 rounded-full bg-amber-400 text-black font-semibold"
-                  >
-                    🔔 Enter
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowEnterConfirm(false)}
-                    className="px-4 py-2 rounded-full border border-amber-200/40 text-amber-100"
-                  >
-                    Later
-                  </button>
-                </div>
-              </div>
+        {/* Show keypad if requested */}
+        {showKeypad ? (
+          <ZoneKeypad
+            zoneName="Kazmo Mansion"
+            zoneId="kazmo-mansion"
+            requiredLevel="user"
+            onAccessGranted={handleAccessGranted}
+            onAdminAccess={handleAdminAccess}
+            variant="light"
+          />
+        ) : hasAccess ? (
+          // Access granted - show enter button
+          <div
+            className="relative w-[290px] md:w-[320px] rounded-[32px] bg-black/92 border border-amber-300/80 shadow-[0_0_90px_rgba(252,211,77,0.9)] px-6 py-7 md:px-7 md:py-8 flex flex-col items-center justify-center"
+          >
+            <div className="pointer-events-none absolute inset-0 rounded-[32px] bg-gradient-to-b from-amber-50/8 via-transparent to-amber-200/18" />
+
+            <div className="relative z-10 w-full flex flex-col items-center gap-3">
+              <p className="text-[10px] uppercase tracking-[0.3em] text-amber-300/80">
+                Access granted
+              </p>
+
+              {user && (
+                <p className="text-sm text-amber-100/90">
+                  Welcome, <strong>{user.name}</strong>
+                </p>
+              )}
+
+              <button
+                type="button"
+                onClick={handleEnterHouse}
+                className="inline-flex items-center justify-center px-6 py-2.5 rounded-full bg-amber-400 text-black text-sm font-semibold shadow-[0_0_26px_rgba(252,211,77,0.95)] hover:bg-amber-300 transition"
+              >
+                🔔 Enter House
+              </button>
+
+              <p className="mt-1 text-[10px] text-amber-100/70">
+                Tap to step inside.
+              </p>
             </div>
-          )}
+          </div>
+        ) : (
+          // Default guest state - show sign in prompt
+          <div
+            className="relative w-[290px] md:w-[320px] rounded-[32px] bg-black/92 border border-amber-300/80 shadow-[0_0_90px_rgba(252,211,77,0.9)] px-6 py-7 md:px-7 md:py-8 flex flex-col items-center justify-center"
+          >
+            <div className="pointer-events-none absolute inset-0 rounded-[32px] bg-gradient-to-b from-amber-50/8 via-transparent to-amber-200/18" />
 
-        {/* Glowing tablet on the door */}
-        <div
-          className={[
-            "relative",
-            "w-[290px] md:w-[320px]",
-            "rounded-[32px]",
-            "bg-black/92",
-            "border border-amber-300/80",
-            "shadow-[0_0_90px_rgba(252,211,77,0.9)]",
-            "px-6 py-7 md:px-7 md:py-8",
-            "flex flex-col items-center justify-center",
-            "transition-transform duration-300",
-            tabletIsZoomed ? "scale-105" : "scale-100",
-          ].join(" ")}
-        >
-          <div className="pointer-events-none absolute inset-0 rounded-[32px] bg-gradient-to-b from-amber-50/8 via-transparent to-amber-200/18" />
-
-          <div className="relative z-10 w-full">
-            {/* ---------- 1. ACCESS GRANTED (ENTER HOUSE) ---------- */}
-            {canEnter && !showKeypad && !showAuth && (
-              <div className="flex flex-col items-center gap-3">
-                <p className="text-[10px] uppercase tracking-[0.3em] text-amber-300/80">
-                  Access granted
-                </p>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    // Play doorbell sound
-                    const doorbell = new Audio('/doorbell.mp3');
-                    doorbell.volume = 0.4;
-                    doorbell.play().catch(() => {/* ignore */});
-                    onEnterHouse();
-                  }}
-                  className="inline-flex items-center justify-center px-6 py-2.5 rounded-full bg-amber-400 text-black text-sm font-semibold shadow-[0_0_26px_rgba(252,211,77,0.95)] hover:bg-amber-300 transition"
-                >
-                  Enter House
-                </button>
-
-                <p className="mt-1 text-[10px] text-amber-100/70">
-                  Tap to step inside.
-                </p>
-
-                <button
-                  type="button"
-                  onClick={() => setShowKeypad(true)}
-                  className="mt-2 text-[10px] text-amber-200/70 underline hover:text-amber-100/90"
-                >
-                  Master Key
-                </button>
+            <div className="relative z-10 w-full flex flex-col items-center gap-4">
+              <div className="mb-2 px-4 py-2 rounded-xl bg-amber-900/30 border border-amber-500/50">
+                <p className="text-[11px] text-amber-200/90">🚪 Not Home</p>
               </div>
-            )}
+              
+              <p className="text-[10px] uppercase tracking-[0.3em] text-amber-300/80">
+                Welcome guest
+              </p>
 
-            {/* ---------- 2. GUEST STATE (DEFAULT) ---------- */}
-            {!canEnter && !showKeypad && !showAuth && (
-              <div className="flex flex-col items-center gap-4">
-                <div className="mb-2 px-4 py-2 rounded-xl bg-amber-900/30 border border-amber-500/50">
-                  <p className="text-[11px] text-amber-200/90">🚪 Not Home</p>
-                </div>
-                
-                <p className="text-[10px] uppercase tracking-[0.3em] text-amber-300/80">
-                  Welcome guest
-                </p>
+              <button
+                type="button"
+                onClick={() => setShowKeypad(true)}
+                className="inline-flex items-center justify-center px-5 py-2.5 rounded-full bg-amber-400 text-black text-sm font-semibold shadow-[0_0_24px_rgba(252,211,77,0.9)] hover:bg-amber-300 transition"
+              >
+                Enter Access Code
+              </button>
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    setAuthTab("signin");
-                    setShowAuth(true);
-                  }}
-                  className="inline-flex items-center justify-center px-5 py-2.5 rounded-full bg-amber-400 text-black text-sm font-semibold shadow-[0_0_24px_rgba(252,211,77,0.9)] hover:bg-amber-300 transition"
-                >
-                  Sign in / Create account
-                </button>
-
-                <p className="mt-1 text-[10px] text-amber-100/65 max-w-[220px]">
-                  Your account becomes your personal key to the house.
-                </p>
-
-                <button
-                  type="button"
-                  onClick={() => setShowKeypad(true)}
-                  className="mt-2 text-[10px] text-amber-200/70 underline hover:text-amber-100/90"
-                >
-                  Master Key
-                </button>
+              <p className="mt-1 text-[10px] text-amber-100/65 max-w-[220px]">
+                4-digit access code required. Don't have one? Tap "Get Access Key" on the keypad.
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+    </RoomSection>
+  );
+}
               </div>
             )}
 

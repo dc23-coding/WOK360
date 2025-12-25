@@ -2,6 +2,7 @@
 import { useState, useEffect, Suspense, lazy } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useZoneContext } from "../../context/ZoneContext";
+import { isAdmin, hasAccessLevel } from "../../lib/zoneAccessControl";
 import HeroDoor from "../../sections/HeroDoor";
 
 // Lazy-loaded mansion rooms and hallways
@@ -17,19 +18,20 @@ const DarkHallway = lazy(() => import("./hallways/DarkHallway"));
 const DarkBedroom = lazy(() => import("./rooms/DarkBedroom"));
 const DarkPlayroom = lazy(() => import("./rooms/DarkPlayroom"));
 
-export default function KazmoMansionWorld({ 
-  isPremium,
-  user,
-  onExitWorld,
-  initialMode = "light" 
-}) {
+export default function KazmoMansionWorld({ onExitWorld, initialMode = "light" }) {
   const { setCurrentWing } = useZoneContext();
-  const [adminUnlocked, setAdminUnlocked] = useState(false);
   const [hasEnteredMansion, setHasEnteredMansion] = useState(false);
   const [activeRoom, setActiveRoom] = useState(null);
+  const [adminAccess, setAdminAccess] = useState(false);
 
-  const canEnter = !!user || adminUnlocked;
-  const canAccessDark = isPremium || adminUnlocked;
+  // Check access on mount
+  useEffect(() => {
+    const adminStatus = isAdmin();
+    setAdminAccess(adminStatus);
+  }, []);
+
+  // Dark wing requires premium or admin
+  const canAccessDark = adminAccess || hasAccessLevel({ access_level: "premium" }, "premium");
 
   // Disable scroll until mansion is entered
   useEffect(() => {
@@ -39,14 +41,13 @@ export default function KazmoMansionWorld({
     };
   }, [hasEnteredMansion]);
 
-  // Admin keypad unlock
-  const handleKeypadAccess = () => {
-    setAdminUnlocked(true);
+  // Admin access granted
+  const handleAdminAccess = () => {
+    setAdminAccess(true);
   };
 
   // Enter mansion
   const handleEnterMansion = () => {
-    if (!canEnter) return;
     setHasEnteredMansion(true);
   };
   
@@ -101,10 +102,8 @@ export default function KazmoMansionWorld({
             transition={{ duration: 0.5 }}
           >
             <HeroDoor
-              isSignedIn={!!user}
-              canEnter={canEnter}
-              onKeypadAccess={handleKeypadAccess}
               onEnterHouse={handleEnterMansion}
+              onAdminAccess={handleAdminAccess}
             />
           </motion.div>
         )}

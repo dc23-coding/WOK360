@@ -1,46 +1,25 @@
 // src/universe/UniversePage.jsx
 // Universe Map - Direct entry, no global authentication required
-// Authentication handled per-zone (Kazmo Mansion, Shadow Market)
+// Authentication handled per-zone via access keys
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { useSupabaseAuth } from "../context/ClerkAuthContext";
 import { regions } from "./data/regions";
-import { requiresAuthentication } from "../lib/zoneAccessControl";
 import RegionCard from "./components/RegionCard";
 import MapGlobe from "./components/MapGlobe";
 import OrbitalNavigator from "./components/OrbitalNavigator";
 
-export default function UniversePage({ isPremium, onEnterWorld }) {
-  const { user } = useSupabaseAuth();
+export default function UniversePage({ onEnterWorld }) {
   const [viewMode, setViewMode] = useState("orbit"); // "grid" | "globe" | "orbit"
 
   const handleWorldClick = (worldId) => {
-    const region = regions.find(r => r.id === worldId);
-    
-    // Check if zone requires authentication
-    const needsAuth = requiresAuthentication(region);
-    
-    // If no auth required, enter directly
-    if (!needsAuth) {
-      onEnterWorld(worldId);
-      return;
-    }
-    
-    // Authentication required - world itself will handle the auth gate
-    // (Kazmo Mansion has gold-plated signin, Shadow Market has its own)
+    // All worlds handle their own authentication via ZoneKeypad
+    // Enter directly - world will show keypad if needed
     onEnterWorld(worldId);
   };
   
   // All regions are visible and accessible from universe map
   // Authentication is handled at the world entry point
   const visibleRegions = regions;
-
-  const handleAuthComplete = () => {
-    if (pendingWorld) {
-      onEnterWorld(pendingWorld.id);
-      setPendingWorld(null);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-black via-slate-900 to-black text-white overflow-hidden pt-16 sm:pt-20">

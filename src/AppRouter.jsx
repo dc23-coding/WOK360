@@ -14,6 +14,7 @@ const ClubHollywoodWorld = lazy(() => import("./worlds/clubHollywood/ClubHollywo
 const KazmoMansionWorld = lazy(() => import("./worlds/kazmoMansion/KazmoMansionWorld"));
 const ShadowMarketWorld = lazy(() => import("./worlds/shadowMarket/ShadowMarketWorld"));
 const StudioBeltWorld = lazy(() => import("./worlds/studioBelt/StudioBeltWorld"));
+const ChakraCenterWorld = lazy(() => import("./worlds/chakraCenter/ChakraCenterWorld"));
 
 function AppRouterContent() {
   const { currentZone, currentWing, setCurrentZone, setCurrentWing } = useZoneContext();
@@ -32,6 +33,8 @@ function AppRouterContent() {
       setCurrentZone('clubHollywood');
     } else if (activeWorld === 'shadow-market') {
       setCurrentZone('shadowMarket');
+    } else if (activeWorld === 'chakra-center') {
+      setCurrentZone('chakraCenter');
     }
   }, [activeWorld, setCurrentZone, setCurrentWing]);
   
@@ -133,6 +136,24 @@ function AppRouterContent() {
               </div>
             }>
               <StudioBeltWorld onExitWorld={handleExitWorld} />
+            </Suspense>
+          </motion.div>
+        )}
+
+        {activeWorld === "chakra-center" && (
+          <motion.div
+            key="chakra-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Suspense fallback={
+              <div className="w-screen h-screen bg-gradient-to-b from-purple-900 via-indigo-900 to-black flex items-center justify-center">
+                <div className="text-purple-300 text-xl">Loading Chakra Center...</div>
+              </div>
+            }>
+              <ChakraCenterWorld onExitWorld={handleExitWorld} />
             </Suspense>
           </motion.div>
         )}

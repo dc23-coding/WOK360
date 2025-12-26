@@ -2,7 +2,7 @@
 import { useState, useEffect, Suspense, lazy } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useZoneContext } from "../../context/ZoneContext";
-import { isAdmin, hasAccessLevel } from "../../lib/zoneAccessControl";
+import { isAdmin, getCurrentUser, hasAccessLevel } from "../../lib/zoneAccessControl";
 import HeroDoor from "../../sections/HeroDoor";
 
 // Lazy-loaded mansion rooms and hallways
@@ -18,20 +18,23 @@ const DarkHallway = lazy(() => import("./hallways/DarkHallway"));
 const DarkBedroom = lazy(() => import("./rooms/DarkBedroom"));
 const DarkPlayroom = lazy(() => import("./rooms/DarkPlayroom"));
 
-export default function KazmoMansionWorld({ onExitWorld, initialMode = "light" }) {
+export default function KazmoMansionWorld({ onExitWorld }) {
   const { setCurrentWing } = useZoneContext();
   const [hasEnteredMansion, setHasEnteredMansion] = useState(false);
   const [activeRoom, setActiveRoom] = useState(null);
   const [adminAccess, setAdminAccess] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
 
   // Check access on mount
   useEffect(() => {
     const adminStatus = isAdmin();
+    const user = getCurrentUser();
     setAdminAccess(adminStatus);
+    setCurrentUser(user);
   }, []);
 
-  // Dark wing requires premium or admin
-  const canAccessDark = adminAccess || hasAccessLevel({ access_level: "premium" }, "premium");
+  // Dark wing requires premium or admin - STRICT CHECK
+  const canAccessDark = adminAccess || (currentUser && currentUser.access_level === "premium");
 
   // Disable scroll until mansion is entered
   useEffect(() => {
@@ -51,10 +54,14 @@ export default function KazmoMansionWorld({ onExitWorld, initialMode = "light" }
     setHasEnteredMansion(true);
   };
   
-  // Persisted mode for this world
+  // Persisted mode for this world - default to light
   const [mode, setMode] = useState(() => {
-    if (typeof window === "undefined") return initialMode;
+    if (typeof window === "undefined") return "light";
+    // Only allow dark if user is premium or admin
     const stored = window.localStorage.getItem("kazmoMansion_mode");
+    if (stored === "dark" && !canAccessDark) {
+      return "light"; // Force light if no premium access
+    }
     return stored === "dark" ? "dark" : "light";
   });
 

@@ -28,18 +28,18 @@ export const regions = [
     name: "Shadow Market",
     district: "Exchange District",
     description: "The decentralized marketplace for crypto trading, real estate listings, and real-world assets. Trade on the DEX, invest in tokenized properties, and access exclusive RWA opportunities.",
-    status: "preview", // Changed from "active" to "preview"
-    requiredAccess: "public", // Changed to "public" so anyone can visit and see preview
+    status: "active", // NOW ACTIVE
+    requiredAccess: "authenticated", // Requires access key
     zoneCode: "2000", // Shadow Market zone code
     allowWalletAuth: true, // Enable crypto wallet authentication
     thumbnail: null, // Add actual thumbnail later
     coordinates: { lat: 35.68, lng: 139.65 },
     features: [
-      "Crypto DEX (Decentralized Exchange) - Preview",
-      "Chart Analysis Tools - In Development",
-      "Real Estate Listings & Tokenization - Coming Soon",
-      "Real-World Assets (RWA) Marketplace - Coming Soon",
-      "Property Investment Opportunities - Coming Soon",
+      "Crypto DEX (Decentralized Exchange)",
+      "Chart Analysis Tools",
+      "Real Estate Listings & Tokenization",
+      "Real-World Assets (RWA) Marketplace",
+      "Property Investment Opportunities",
       "Secure Blockchain Transactions"
     ],
     entryPoint: "/world/shadow-market"
@@ -85,21 +85,22 @@ export const regions = [
   {
     id: "chakra-center",
     name: "Chakra Center",
-    district: "Healing & Wellness Center",
-    description: "A sacred healing sanctuary for mental, physical, and spiritual wellness. Explore curated books, resources, and tools for holistic health. Join an invitation-only community for deep connection and support.",
-    status: "coming-soon",
-    requiredAccess: "none", // Free access - premium for tracking
+    district: "Wellness District",
+    description: "Your personal wellness sanctuary. Access binaural beats for meditation, track your health journey, and receive AI-powered health advice tailored to your unique needs.",
+    status: "active", // NOW ACTIVE
+    requiredAccess: "authenticated", // Requires access key
     zoneCode: "4000", // Chakra Center zone code
-    premiumFeatures: ["Health Tracking", "Personalized AI Plans", "Progress Analytics"],
+    premiumFeatures: ["Advanced Health Tracking", "Custom AI Diet Plans", "Progress Analytics"],
     thumbnail: null, // Add actual thumbnail later
     coordinates: { lat: 51.51, lng: -0.13 },
     features: [
-      "Binaural Sounds Library",
-      "Downloadable Books & Resources",
-      "Health Tips & Videos",
-      "Daily Wellness Plans",
-      "AI Arcane Health Advice",
-      "Premium: Progress Tracking"
+      "Binaural Beats Audio Library",
+      "Self-Improvement Book Collection",
+      "Health & Wealth Resources",
+      "Personal Health Data Tracking",
+      "Fitness Journey Monitoring",
+      "AI Health Advisor Chatbot",
+      "Personalized Diet Strategies"
     ],
     entryPoint: "/world/chakra-center"
   },

@@ -28,7 +28,7 @@ export const regions = [
     name: "Shadow Market",
     district: "Exchange District",
     description: "Enter the enigmatic Shadow Market for exclusive NFT drops, prediction markets, and DeFi trading. Bet on real-world outcomes with Polygon, trade tokenized assets, and access premium commerce opportunities.",
-    status: "active", // NOW ACTIVE
+    status: "coming-soon", // DISABLED: Investigating glitch
     requiredAccess: "authenticated", // Requires access key
     zoneCode: "2000", // Shadow Market zone code
     allowWalletAuth: true, // Enable crypto wallet authentication

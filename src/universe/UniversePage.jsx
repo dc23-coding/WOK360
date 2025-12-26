@@ -86,14 +86,13 @@ export default function UniversePage({ onEnterWorld }) {
               <OrbitalNavigator
                 regions={visibleRegions}
                 onSelectZone={handleWorldClick}
-                isPremium={isPremium}
               />
             </div>
           ) : viewMode === "grid" ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {visibleRegions.map((region, idx) => {
-                // Show as accessible unless it's premium and user doesn't have premium
-                const isAccessible = region.requiredAccess !== "premium" || isPremium;
+                // All regions shown as accessible - access control handled by zone keypad
+                const isAccessible = true;
                 
                 return (
                   <RegionCard
@@ -109,7 +108,7 @@ export default function UniversePage({ onEnterWorld }) {
           ) : (
             <MapGlobe
               regions={visibleRegions}
-              accessibleRegions={visibleRegions.filter(r => r.requiredAccess !== "premium" || isPremium)}
+              accessibleRegions={visibleRegions}
               onRegionClick={handleWorldClick}
             />
           )}

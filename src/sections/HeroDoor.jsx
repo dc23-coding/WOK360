@@ -39,7 +39,7 @@ export default function HeroDoor({ onEnterHouse, onAdminAccess }) {
   };
 
   return (
-    <RoomSection bg="/Frontdoor_Main.png" className="bg-black">
+    <RoomSection bg="/Frontdoor_Main.webp" className="bg-black">
       <div className="relative w-full h-full flex flex-col items-center justify-center text-center text-amber-50 px-4">
         {/* Title & subtitle */}
         <div className="mb-10">

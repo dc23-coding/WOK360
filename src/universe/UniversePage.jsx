@@ -5,10 +5,9 @@ import { useState } from "react";
 import { regions } from "./data/regions";
 import RegionCard from "./components/RegionCard";
 import MapGlobe from "./components/MapGlobe";
-import OrbitalNavigator from "./components/OrbitalNavigator";
 
 export default function UniversePage({ onEnterWorld }) {
-  const [viewMode, setViewMode] = useState("orbit"); // "grid" | "globe" | "orbit"
+  const [viewMode, setViewMode] = useState("grid"); // "grid" | "globe" - REMOVED "orbit"
 
   const handleWorldClick = (worldId) => {
     // All worlds handle their own authentication via ZoneKeypad
@@ -38,17 +37,6 @@ export default function UniversePage({ onEnterWorld }) {
           <div className="mt-4 sm:mt-6 inline-flex items-center rounded-full bg-slate-800/50 backdrop-blur px-1 py-1 border border-slate-700 touch-manipulation">
             <button
               type="button"
-              onClick={() => setViewMode("orbit")}
-              className={`px-3 sm:px-4 py-2 min-w-[80px] sm:min-w-0 rounded-full text-xs sm:text-sm transition ${
-                viewMode === "orbit"
-                  ? "bg-cyan-500 text-white shadow-lg"
-                  : "text-slate-400 hover:text-white active:text-cyan-300"
-              }`}
-            >
-              🪐 Orbit
-            </button>
-            <button
-              type="button"
               onClick={() => setViewMode("grid")}
               className={`px-3 sm:px-4 py-2 min-w-[80px] sm:min-w-0 rounded-full text-xs sm:text-sm transition ${
                 viewMode === "grid"
@@ -56,7 +44,7 @@ export default function UniversePage({ onEnterWorld }) {
                   : "text-slate-400 hover:text-white active:text-cyan-300"
               }`}
             >
-              Grid
+              📋 Grid
             </button>
             <button
               type="button"
@@ -67,7 +55,7 @@ export default function UniversePage({ onEnterWorld }) {
                   : "text-slate-400 hover:text-white active:text-cyan-300"
               }`}
             >
-              Globe
+              🌍 Globe
             </button>
           </div>
         </div>

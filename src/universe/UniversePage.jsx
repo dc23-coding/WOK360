@@ -2,7 +2,6 @@
 // Universe Map - Direct entry, no global authentication required
 // Authentication handled per-zone via access keys
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { regions } from "./data/regions";
 import RegionCard from "./components/RegionCard";
 import MapGlobe from "./components/MapGlobe";
@@ -26,18 +25,14 @@ export default function UniversePage({ onEnterWorld }) {
       {/* Universe Header */}
       <header className="relative z-20 py-6 sm:py-8 px-4 sm:px-6 md:px-12">
         <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
+          <div>
             <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold bg-gradient-to-r from-cyan-400 via-amber-300 to-cyan-400 bg-clip-text text-transparent">
               World of Karma 360
             </h1>
             <p className="mt-2 sm:mt-3 text-base sm:text-lg md:text-xl text-slate-300">
               Explore immersive worlds — authentication only where needed
             </p>
-          </motion.div>
+          </div>
 
           {/* View Toggle - Touch optimized */}
           <div className="mt-4 sm:mt-6 inline-flex items-center rounded-full bg-slate-800/50 backdrop-blur px-1 py-1 border border-slate-700 touch-manipulation">

@@ -9,52 +9,29 @@ export default function MapGlobe({ regions, accessibleRegions, onRegionClick }) 
     <div className="relative w-full h-[600px] flex items-center justify-center overflow-hidden">
       {/* Starfield Background */}
       <div className="absolute inset-0 overflow-hidden">
-        {/* Stars */}
-        {Array.from({ length: 100 }).map((_, i) => {
+        {/* Stars - Static for performance */}
+        {Array.from({ length: 20 }).map((_, i) => {
           const size = Math.random() * 2 + 1;
           const x = Math.random() * 100;
           const y = Math.random() * 100;
-          const delay = Math.random() * 3;
-          const duration = Math.random() * 2 + 2;
           
           return (
-            <motion.div
+            <div
               key={i}
-              className="absolute rounded-full bg-white"
+              className="absolute rounded-full bg-white opacity-50"
               style={{
                 width: `${size}px`,
                 height: `${size}px`,
                 left: `${x}%`,
                 top: `${y}%`
               }}
-              animate={{
-                opacity: [0.2, 1, 0.2],
-                scale: [1, 1.5, 1]
-              }}
-              transition={{
-                duration,
-                delay,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
             />
           );
         })}
       </div>
 
-      {/* Globe Container with Scaling Animation */}
-      <motion.div 
-        className="relative w-full max-w-2xl aspect-square z-10"
-        animate={{
-          scale: [1, 1.05, 1],
-          rotate: [0, 2, 0, -2, 0]
-        }}
-        transition={{
-          duration: 8,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
-      >
+      {/* Globe Container - Static for performance */}
+      <div className="relative w-full max-w-2xl aspect-square z-10">
         {/* Globe Circle */}
         <div className="absolute inset-0 rounded-full bg-gradient-to-br from-slate-800 via-slate-900 to-black border-2 border-cyan-400/30 shadow-[0_0_80px_rgba(34,211,238,0.3)]">
           {/* Grid Lines Effect */}
@@ -104,7 +81,7 @@ export default function MapGlobe({ regions, accessibleRegions, onRegionClick }) 
             const y = 50 + radius * Math.sin(angle);
 
             return (
-              <motion.div
+              <div
                 key={region.id}
                 className="absolute"
                 style={{
@@ -112,14 +89,11 @@ export default function MapGlobe({ regions, accessibleRegions, onRegionClick }) 
                   top: `${y}%`,
                   transform: "translate(-50%, -50%)"
                 }}
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: idx * 0.1, duration: 0.4 }}
                 onMouseEnter={() => setHoveredRegion(region.id)}
                 onMouseLeave={() => setHoveredRegion(null)}
               >
                 {/* Marker Dot */}
-                <motion.button
+                <button
                   onClick={() => isActive && isAccessible && onRegionClick(region.id)}
                   className={`
                     w-4 h-4 rounded-full border-2 relative
@@ -131,30 +105,12 @@ export default function MapGlobe({ regions, accessibleRegions, onRegionClick }) 
                     }
                     transition-all duration-300
                   `}
-                  whileHover={{ scale: isActive && isAccessible ? 1.5 : 1 }}
                 >
-                  {/* Pulse Animation for Active Regions */}
-                  {isActive && isAccessible && (
-                    <motion.div
-                      className="absolute inset-0 rounded-full bg-cyan-400"
-                      animate={{
-                        scale: [1, 2, 1],
-                        opacity: [0.6, 0, 0.6]
-                      }}
-                      transition={{
-                        duration: 2,
-                        repeat: Infinity,
-                        ease: "easeInOut"
-                      }}
-                    />
-                  )}
-                </motion.button>
+                </button>
 
                 {/* Tooltip */}
                 {hoveredRegion === region.id && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
+                  <div
                     className="absolute top-6 left-1/2 -translate-x-1/2 z-10 whitespace-nowrap"
                   >
                     <div className="px-3 py-2 rounded-lg bg-slate-900/95 border border-cyan-400/50 shadow-xl backdrop-blur">
@@ -171,9 +127,9 @@ export default function MapGlobe({ regions, accessibleRegions, onRegionClick }) 
                         <p className="text-xs text-amber-400 mt-1">Coming Soon</p>
                       )}
                     </div>
-                  </motion.div>
+                  </div>
                 )}
-              </motion.div>
+              </div>
             );
           })}
         </div>
@@ -181,25 +137,15 @@ export default function MapGlobe({ regions, accessibleRegions, onRegionClick }) 
         {/* Center Logo/Text */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="text-center">
-            <motion.div
-              animate={{
-                rotate: 360
-              }}
-              transition={{
-                duration: 60,
-                repeat: Infinity,
-                ease: "linear"
-              }}
-              className="text-6xl mb-2 opacity-30"
-            >
+            <div className="text-6xl mb-2 opacity-30">
               🌍
-            </motion.div>
+            </div>
             <p className="text-xs uppercase tracking-[0.3em] text-cyan-400/60">
               Karma Universe
             </p>
           </div>
         </div>
-      </motion.div>
+      </div>
 
       {/* Legend */}
       <div className="absolute bottom-0 right-0 bg-slate-900/90 backdrop-blur border border-slate-700 rounded-xl p-4 text-xs z-20">

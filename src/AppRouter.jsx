@@ -2,7 +2,6 @@
 // World of Karma 360 - Universe Router
 // Authentication is zone-specific via access keys (4-digit codes)
 import { useState, Suspense, lazy, useEffect } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 import { ZoneProvider, useZoneContext } from "./context/ZoneContext";
 import { CleAssistant } from "./ai/cle";
 import GlobalMediaPlayer from "./components/GlobalMediaPlayer";
@@ -15,12 +14,14 @@ const KazmoMansionWorld = lazy(() => import("./worlds/kazmoMansion/KazmoMansionW
 const ShadowMarketWorld = lazy(() => import("./worlds/shadowMarket/ShadowMarketWorld"));
 const StudioBeltWorld = lazy(() => import("./worlds/studioBelt/StudioBeltWorld"));
 const ChakraCenterWorld = lazy(() => import("./worlds/chakraCenter/ChakraCenterWorld"));
+const ArcaneTowerWorld = lazy(() => import("./worlds/arcaneTower/ArcaneTowerWorld"));
 
 function AppRouterContent() {
-  const { currentZone, currentWing, setCurrentZone, setCurrentWing } = useZoneContext();
+  const { setCurrentZone, setCurrentWing } = useZoneContext();
 
   // Universe state - users start here without authentication
   const [activeWorld, setActiveWorld] = useState(null); // null | "kazmo-mansion" | "shadow-market" | "club-hollywood" etc
+  const [isTransitioning, setIsTransitioning] = useState(false);
   
   // Update zone context when active world changes
   useEffect(() => {
@@ -35,20 +36,28 @@ function AppRouterContent() {
       setCurrentZone('shadowMarket');
     } else if (activeWorld === 'chakra-center') {
       setCurrentZone('chakraCenter');
+    } else if (activeWorld === 'arcane-tower') {
+      setCurrentZone('arcaneTower');
     }
   }, [activeWorld, setCurrentZone, setCurrentWing]);
   
-  // Navigate to a specific world
+  // Navigate to a specific world with debounce protection
   // ---------------------------------------------------------------------------
   const handleEnterWorld = (worldId) => {
+    if (isTransitioning) return; // Prevent rapid switching
+    setIsTransitioning(true);
     setActiveWorld(worldId);
+    setTimeout(() => setIsTransitioning(false), 300); // Reset after transition
   };
 
   // ---------------------------------------------------------------------------
   // Exit world back to universe map
   // ---------------------------------------------------------------------------
   const handleExitWorld = () => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
     setActiveWorld(null);
+    setTimeout(() => setIsTransitioning(false), 300);
   };
 
   return (
@@ -63,101 +72,67 @@ function AppRouterContent() {
       {/* ---------------------------------------------------------------------------
           ACTIVE WORLD RENDERER
       --------------------------------------------------------------------------- */}
-      <AnimatePresence mode="wait">
-        {activeWorld === "club-hollywood" && (
-          <motion.div
-            key="club-hollywood"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <Suspense fallback={
-              <div className="w-screen h-screen bg-black flex items-center justify-center">
-                <div className="text-cyan-400 text-xl">Loading Club Hollywood...</div>
-              </div>
-            }>
-              <ClubHollywoodWorld
-                onExitWorld={handleExitWorld}
-              />
-            </Suspense>
-          </motion.div>
-        )}
+      {activeWorld === "club-hollywood" && (
+        <Suspense fallback={
+          <div className="w-screen h-screen bg-black flex items-center justify-center">
+            <div className="text-cyan-400 text-xl">Loading Club Hollywood...</div>
+          </div>
+        }>
+          <ClubHollywoodWorld
+            onExitWorld={handleExitWorld}
+          />
+        </Suspense>
+      )}
 
-        {activeWorld === "kazmo-mansion" && (
-          <motion.div
-            key="kazmo-mansion"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <Suspense fallback={
-              <div className="w-screen h-screen bg-black flex items-center justify-center">
-                <div className="text-cyan-400 text-xl">Loading Kazmo Mansion...</div>
-              </div>
-            }>
-              <KazmoMansionWorld onExitWorld={handleExitWorld} />
-            </Suspense>
-          </motion.div>
-        )}
+      {activeWorld === "kazmo-mansion" && (
+        <Suspense fallback={
+          <div className="w-screen h-screen bg-black flex items-center justify-center">
+            <div className="text-amber-400 text-xl">Loading Kazmo Mansion...</div>
+          </div>
+        }>
+          <KazmoMansionWorld onExitWorld={handleExitWorld} />
+        </Suspense>
+      )}
 
-        {activeWorld === "shadow-market" && (
-          <motion.div
-            key="shadow-market"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <Suspense fallback={
-              <div className="w-screen h-screen bg-black flex items-center justify-center">
-                <div className="text-purple-400 text-xl">Loading Shadow Market...</div>
-              </div>
-            }>
-              <ShadowMarketWorld
-                onExitWorld={handleExitWorld}
-              />
-            </Suspense>
-          </motion.div>
-        )}
+      {activeWorld === "shadow-market" && (
+        <Suspense fallback={
+          <div className="w-screen h-screen bg-black flex items-center justify-center">
+            <div className="text-purple-400 text-xl">Loading Shadow Market...</div>
+          </div>
+        }>
+          <ShadowMarketWorld onExitWorld={handleExitWorld} />
+        </Suspense>
+      )}
 
-        {activeWorld === "studio-belt" && (
-          <motion.div
-            key="studio-belt"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <Suspense fallback={
+      {activeWorld === "studio-belt" && (
+        <Suspense fallback={
               <div className="w-screen h-screen bg-black flex items-center justify-center">
-                <div className="text-purple-400 text-xl">Loading Studio Belt...</div>
-              </div>
-            }>
-              <StudioBeltWorld onExitWorld={handleExitWorld} />
-            </Suspense>
-          </motion.div>
-        )}
+            <div className="text-blue-400 text-xl">Loading Studio Belt...</div>
+          </div>
+        }>
+          <StudioBeltWorld onExitWorld={handleExitWorld} />
+        </Suspense>
+      )}
 
-        {activeWorld === "chakra-center" && (
-          <motion.div
-            key="chakra-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <Suspense fallback={
+      {activeWorld === "chakra-center" && (
+        <Suspense fallback={
               <div className="w-screen h-screen bg-gradient-to-b from-purple-900 via-indigo-900 to-black flex items-center justify-center">
                 <div className="text-purple-300 text-xl">Loading Chakra Center...</div>
               </div>
             }>
               <ChakraCenterWorld onExitWorld={handleExitWorld} />
             </Suspense>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      )}
+
+      {activeWorld === "arcane-tower" && (
+        <Suspense fallback={
+          <div className="w-screen h-screen bg-gradient-to-br from-purple-950 via-indigo-950 to-slate-950 flex items-center justify-center">
+            <div className="text-purple-300 text-xl">Loading Arcane Tower...</div>
+          </div>
+        }>
+          <ArcaneTowerWorld onExitWorld={handleExitWorld} />
+        </Suspense>
+      )}
 
       {/* ---------------------------------------------------------------------------
           GLOBAL CLE ASSISTANT - Available everywhere in universe

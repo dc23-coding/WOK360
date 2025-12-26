@@ -11,15 +11,15 @@ export default function OrbitalNavigator({ regions, onSelectZone, isPremium }) {
   const activeRegion = regions[activeIndex];
   const totalZones = regions.length;
 
-  // Auto-rotate orbit every 5 seconds if not manually controlled
-  useEffect(() => {
-    if (isRotating) {
-      const interval = setInterval(() => {
-        handleNext();
-      }, 5000);
-      return () => clearInterval(interval);
-    }
-  }, [isRotating, activeIndex]);
+  // Auto-rotate disabled for performance
+  // useEffect(() => {
+  //   if (isRotating) {
+  //     const interval = setInterval(() => {
+  //       handleNext();
+  //     }, 5000);
+  //     return () => clearInterval(interval);
+  //   }
+  // }, [isRotating, activeIndex]);
 
   const handleNext = () => {
     setDirection(1);
@@ -56,10 +56,8 @@ export default function OrbitalNavigator({ regions, onSelectZone, isPremium }) {
     <div className="relative w-full h-full flex items-center justify-center">
       {/* Orbital Ring */}
       <div className="absolute inset-0 flex items-center justify-center">
-        <motion.div
+        <div
           className="relative w-[90%] h-[90%] md:w-[600px] md:h-[600px] rounded-full border-2 border-dashed border-cyan-400/30"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
         >
           {/* Zone Indicators on Orbit */}
           {regions.map((region, index) => {
@@ -92,7 +90,7 @@ export default function OrbitalNavigator({ regions, onSelectZone, isPremium }) {
               </motion.div>
             );
           })}
-        </motion.div>
+        </div>
       </div>
 
       {/* Center Content - Zone Preview */}

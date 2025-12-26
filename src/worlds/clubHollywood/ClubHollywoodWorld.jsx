@@ -46,15 +46,23 @@ export default function ClubHollywoodWorld({ onExitWorld }) {
       userId,
       timestamp: Date.now(),
     };
-    setReactions(prev => [...prev, newReaction]);
+    setReactions(prev => {
+      // Keep only last 50 reactions to prevent memory leak
+      const updated = [...prev, newReaction];
+      return updated.slice(-50);
+    });
   };
 
   return (
     <div className="w-screen h-screen bg-black text-white overflow-hidden relative">
-      {/* Background Image */}
+      {/* Background Image - Optimized WebP */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: "url(/ClubHollywod.png)" }}
+        style={{ 
+          backgroundImage: "url(/ClubHollywod.webp)",
+          backgroundSize: "cover",
+          willChange: "auto" // Prevent GPU overload
+        }}
       >
         <div className="absolute inset-0 bg-black/40" />
       </div>
@@ -83,12 +91,12 @@ export default function ClubHollywoodWorld({ onExitWorld }) {
           {/* Center - Main Stage Player */}
           <div className="flex-1 flex items-center justify-center p-4 sm:p-6 md:p-8">
             <div className="w-full max-w-5xl">
-              {/* Vibe Player - Automatically pulls content from club-main-stage */}
-              <VibePlayer 
-                variant="dark" 
-                mode="vod" 
+              {/* Vibe Player - Automatically pulls content from club-dance-floor */}
+              <VibePlayer
+                variant="dark"
+                mode="vod"
                 locked={false}
-                roomId="club-main-stage"
+                roomId="club-dance-floor"
               />
             </div>
           </div>

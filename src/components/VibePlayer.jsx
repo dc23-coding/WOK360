@@ -14,7 +14,6 @@ export default function VibePlayer({ variant = "dark", mode = "vod", locked = fa
 
   // Fetch content assigned to this room
   useEffect(() => {
-    console.log(`[VibePlayer] Fetching content for roomId: ${roomId}`);
     sanityClient.fetch(
       `*[_type == "mediaContent" && room == $roomId && defined(mediaFile.asset)] | order(_createdAt desc) {
         _id,
@@ -31,11 +30,10 @@ export default function VibePlayer({ variant = "dark", mode = "vod", locked = fa
       }`,
       { roomId }
     ).then(data => {
-      console.log(`[VibePlayer] Fetched ${data?.length || 0} items for ${roomId}:`, data);
       setVibes(data || []);
       setLoading(false);
     }).catch(err => {
-      console.error(`[VibePlayer] Failed to load content for ${roomId}:`, err);
+      console.error(`[VibePlayer] Failed to load ${roomId}:`, err.message);
       setLoading(false);
     });
   }, [roomId]);

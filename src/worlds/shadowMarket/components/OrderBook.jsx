@@ -8,8 +8,6 @@ export default function OrderBook({ selectedPair, currentPrice }) {
 
   // Fetch real order book data from Coinbase
   useEffect(() => {
-    let intervalId;
-
     const loadOrderBook = async () => {
       const data = await fetchOrderBook(selectedPair);
       if (data && (data.bids.length > 0 || data.asks.length > 0)) {
@@ -22,13 +20,8 @@ export default function OrderBook({ selectedPair, currentPrice }) {
     };
 
     loadOrderBook();
-    
-    // Update every 3 seconds
-    intervalId = setInterval(loadOrderBook, 3000);
-
-    return () => {
-      if (intervalId) clearInterval(intervalId);
-    };
+    const intervalId = setInterval(loadOrderBook, 3000);
+    return () => clearInterval(intervalId);
   }, [selectedPair]);
 
   const renderOrderRow = (order, type) => {

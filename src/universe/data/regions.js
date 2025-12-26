@@ -27,7 +27,7 @@ export const regions = [
     id: "shadow-market",
     name: "Shadow Market",
     district: "Exchange District",
-    description: "The decentralized marketplace for crypto trading, real estate listings, and real-world assets. Trade on the DEX, invest in tokenized properties, and access exclusive RWA opportunities.",
+    description: "Enter the enigmatic Shadow Market for exclusive NFT drops, prediction markets, and DeFi trading. Bet on real-world outcomes with Polygon, trade tokenized assets, and access premium commerce opportunities.",
     status: "active", // NOW ACTIVE
     requiredAccess: "authenticated", // Requires access key
     zoneCode: "2000", // Shadow Market zone code
@@ -35,12 +35,12 @@ export const regions = [
     thumbnail: null, // Add actual thumbnail later
     coordinates: { lat: 35.68, lng: 139.65 },
     features: [
-      "Crypto DEX (Decentralized Exchange)",
-      "Chart Analysis Tools",
-      "Real Estate Listings & Tokenization",
-      "Real-World Assets (RWA) Marketplace",
-      "Property Investment Opportunities",
-      "Secure Blockchain Transactions"
+      "Exclusive NFT Drops",
+      "Prediction Markets (Polygon - Coming Q2 2025)",
+      "Crypto Wallet Integration (MetaMask)",
+      "Limited Edition Merchandise",
+      "Premium Content Access",
+      "VIP Member Perks"
     ],
     entryPoint: "/world/shadow-market"
   },
@@ -107,21 +107,21 @@ export const regions = [
   {
     id: "arcane-tower",
     name: "Arcane Tower",
-    district: "AI Nexus",
-    description: "The central hub for Ask CLE AI. Dive deep into conversations, unlock knowledge archives, and explore AI-powered educational experiences.",
-    status: "coming-soon",
-    requiredAccess: "none", // Free access - AI interactions
-    zoneCode: "6000", // AI Arcane zone code
-    premiumFeatures: ["Extended Conversations", "Memory Archives", "Advanced Modules"],
+    district: "Progression Hub",
+    description: "Climb the Arcane Tower to track your journey, earn achievements, and claim rewards. View your badges, analyze your growth across all worlds, and unlock special perks.",
+    status: "active",
+    requiredAccess: "authenticated",
+    zoneCode: "6000",
+    premiumFeatures: ["Advanced Analytics", "Exclusive Badges", "Premium Rewards"],
     thumbnail: "/arcaneTowerThumb.png",
     coordinates: { lat: 48.86, lng: 2.35 },
     features: [
-      "CLE Conversation Hub",
-      "AI Memory & Knowledge Archives",
-      "Interactive Learning Modules",
-      "Advanced AI Tutorials",
-      "Personalized Education Pathways",
-      "Research & Development Lab"
+      "Achievement Gallery",
+      "Progress Analytics Dashboard",
+      "Rewards Vault",
+      "Multi-World Progression Tracking",
+      "Badge Collection & Honors",
+      "Leaderboards (Coming Soon)"
     ],
     entryPoint: "/world/arcane-tower"
   }

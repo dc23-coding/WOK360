@@ -1,17 +1,22 @@
 // src/worlds/chakraCenter/ChakraCenterWorld.jsx
 // Chakra Center - Wellness Sanctuary with 3 zones
-import { useState } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ZoneKeypad from "../../components/ZoneKeypad";
 import { getCurrentUser, isAdmin } from "../../lib/zoneAccessControl";
 import RoomSection from "../../components/RoomSection";
+
+// Lazy load zones - only active zone loads
+const WellnessLibrary = lazy(() => import("./zones/WellnessLibrary"));
+const HealthTracker = lazy(() => import("./zones/HealthTracker"));
+const AIHealthAdvisor = lazy(() => import("./zones/AIHealthAdvisor"));
 
 export default function ChakraCenterWorld({ onExitWorld }) {
   const [hasAccess, setHasAccess] = useState(false);
   const [activeZone, setActiveZone] = useState(null); // null | 'wellness' | 'tracker' | 'advisor'
 
   // Check if user already has access
-  useState(() => {
+  useEffect(() => {
     const user = getCurrentUser();
     const admin = isAdmin();
     if (user || admin) {
@@ -74,6 +79,7 @@ export default function ChakraCenterWorld({ onExitWorld }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
             className="min-h-screen flex flex-col items-center justify-center p-6"
           >
             <h1 className="text-4xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-purple-300 via-pink-300 to-purple-300 bg-clip-text text-transparent">
@@ -85,9 +91,7 @@ export default function ChakraCenterWorld({ onExitWorld }) {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl w-full">
               {/* Zone 1: Wellness Library */}
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+              <button
                 onClick={() => setActiveZone('wellness')}
                 className="p-8 rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/30 backdrop-blur hover:border-purple-400/60 transition text-left"
               >
@@ -101,12 +105,10 @@ export default function ChakraCenterWorld({ onExitWorld }) {
                   • Book Collection<br />
                   • Health & Wealth Links
                 </div>
-              </motion.button>
+              </button>
 
               {/* Zone 2: Health Tracker */}
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+              <button
                 onClick={() => setActiveZone('tracker')}
                 className="p-8 rounded-2xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-blue-400/30 backdrop-blur hover:border-blue-400/60 transition text-left"
               >
@@ -120,12 +122,10 @@ export default function ChakraCenterWorld({ onExitWorld }) {
                   • Fitness Tracking<br />
                   • Progress Monitoring
                 </div>
-              </motion.button>
+              </button>
 
               {/* Zone 3: AI Health Advisor */}
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+              <button
                 onClick={() => setActiveZone('advisor')}
                 className="p-8 rounded-2xl bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-400/30 backdrop-blur hover:border-green-400/60 transition text-left"
               >
@@ -139,16 +139,17 @@ export default function ChakraCenterWorld({ onExitWorld }) {
                   • Personalized Advice<br />
                   • Diet Strategies
                 </div>
-              </motion.button>
+              </button>
             </div>
           </motion.div>
         ) : (
           // Active Zone Content
           <motion.div
             key={activeZone}
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -50 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
             className="min-h-screen p-6"
           >
             <button
@@ -158,58 +159,15 @@ export default function ChakraCenterWorld({ onExitWorld }) {
               ← Back to Hub
             </button>
 
-            {activeZone === 'wellness' && (
-              <div className="max-w-6xl mx-auto">
-                <h2 className="text-3xl font-bold mb-6 text-purple-100">Wellness Library</h2>
-                <div className="bg-purple-500/10 border border-purple-400/30 rounded-2xl p-8 backdrop-blur">
-                  <p className="text-purple-200/80 mb-4">
-                    🚧 <strong>In Development</strong> - Coming Soon
-                  </p>
-                  <div className="space-y-4 text-sm text-purple-200/60">
-                    <p>• Binaural beats audio player with frequency selection</p>
-                    <p>• Self-improvement book collection with download links</p>
-                    <p>• Health tips, videos, and wellness resources</p>
-                    <p>• Wealth generation strategies and financial wellness</p>
-                  </div>
-                </div>
+            <Suspense fallback={
+              <div className="flex items-center justify-center py-20">
+                <div className="text-purple-200 animate-pulse">Loading zone...</div>
               </div>
-            )}
-
-            {activeZone === 'tracker' && (
-              <div className="max-w-4xl mx-auto">
-                <h2 className="text-3xl font-bold mb-6 text-blue-100">Health Tracker</h2>
-                <div className="bg-blue-500/10 border border-blue-400/30 rounded-2xl p-8 backdrop-blur">
-                  <p className="text-blue-200/80 mb-4">
-                    🚧 <strong>In Development</strong> - Coming Soon
-                  </p>
-                  <div className="space-y-4 text-sm text-blue-200/60">
-                    <p>• Personal health data input (weight, height, age, activity level)</p>
-                    <p>• Fitness journey tracking with progress charts</p>
-                    <p>• Nutrition and meal logging</p>
-                    <p>• Goal setting and achievement monitoring</p>
-                    <p>• Integration with AI advisor for personalized insights</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeZone === 'advisor' && (
-              <div className="max-w-4xl mx-auto">
-                <h2 className="text-3xl font-bold mb-6 text-green-100">AI Health Advisor</h2>
-                <div className="bg-green-500/10 border border-green-400/30 rounded-2xl p-8 backdrop-blur">
-                  <p className="text-green-200/80 mb-4">
-                    🚧 <strong>In Development</strong> - Coming Soon
-                  </p>
-                  <div className="space-y-4 text-sm text-green-200/60">
-                    <p>• AI-powered chatbot analyzing your health data</p>
-                    <p>• Personalized diet strategies based on your goals</p>
-                    <p>• Workout recommendations tailored to your fitness level</p>
-                    <p>• Health advice specific to your needs and conditions</p>
-                    <p>• Continuous learning from your progress and feedback</p>
-                  </div>
-                </div>
-              </div>
-            )}
+            }>
+              {activeZone === 'wellness' && <WellnessLibrary />}
+              {activeZone === 'tracker' && <HealthTracker />}
+              {activeZone === 'advisor' && <AIHealthAdvisor />}
+            </Suspense>
           </motion.div>
         )}
       </AnimatePresence>

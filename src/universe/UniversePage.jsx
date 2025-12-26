@@ -64,14 +64,7 @@ export default function UniversePage({ onEnterWorld }) {
       {/* Main Content */}
       <main className="relative z-10 px-4 sm:px-6 md:px-12 pb-16 sm:pb-20">
         <div className="max-w-7xl mx-auto">
-          {viewMode === "orbit" ? (
-            <div className="min-h-[600px] sm:min-h-[700px]">
-              <OrbitalNavigator
-                regions={visibleRegions}
-                onSelectZone={handleWorldClick}
-              />
-            </div>
-          ) : viewMode === "grid" ? (
+          {viewMode === "grid" ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {visibleRegions.map((region, idx) => {
                 // All regions shown as accessible - access control handled by zone keypad

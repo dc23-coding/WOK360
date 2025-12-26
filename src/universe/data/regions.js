@@ -69,7 +69,7 @@ export const regions = [
     name: "Multiverse Studios",
     district: "Creative Quarter",
     description: "A sprawling complex of recording studios, production rooms, and collaboration spaces. Where music and video content come to life.",
-    status: "active",
+    status: "coming-soon", // DISABLED: Needs content development
     requiredAccess: "premium",
     thumbnail: null, // Add actual thumbnail later
     coordinates: { lat: 40.75, lng: -73.99 },
@@ -87,7 +87,7 @@ export const regions = [
     name: "Chakra Center",
     district: "Wellness District",
     description: "Your personal wellness sanctuary. Access binaural beats for meditation, track your health journey, and receive AI-powered health advice tailored to your unique needs.",
-    status: "active", // NOW ACTIVE
+    status: "coming-soon", // DISABLED: Investigating glitch
     requiredAccess: "authenticated", // Requires access key
     zoneCode: "4000", // Chakra Center zone code
     premiumFeatures: ["Advanced Health Tracking", "Custom AI Diet Plans", "Progress Analytics"],
@@ -109,7 +109,7 @@ export const regions = [
     name: "Arcane Tower",
     district: "Progression Hub",
     description: "Climb the Arcane Tower to track your journey, earn achievements, and claim rewards. View your badges, analyze your growth across all worlds, and unlock special perks.",
-    status: "active",
+    status: "coming-soon", // DISABLED: Basic structure only
     requiredAccess: "authenticated",
     zoneCode: "6000",
     premiumFeatures: ["Advanced Analytics", "Exclusive Badges", "Premium Rewards"],

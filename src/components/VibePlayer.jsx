@@ -9,7 +9,7 @@ import { useMediaPlayer } from "../context/MediaPlayerContext";
 export default function VibePlayer({ variant = "dark", mode = "vod", locked = false, roomId = "club-main-stage" }) {
   const [vibes, setVibes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true); // Start expanded
   const { playMedia, currentMedia, isPlaying } = useMediaPlayer();
 
   // Fetch content assigned to this room
@@ -75,11 +75,12 @@ export default function VibePlayer({ variant = "dark", mode = "vod", locked = fa
         <div className="px-4 py-3 border-b border-slate-700/50">
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="text-sm font-semibold text-white hover:text-cyan-300 transition flex items-center gap-2"
+            className="w-full text-sm font-semibold text-white hover:text-cyan-300 transition flex items-center gap-2 cursor-pointer"
+            type="button"
           >
             <Music className="w-4 h-4" />
             {isExpanded ? "Hide" : "Show"} Playlist ({vibes.length})
-            <span className="text-xs opacity-60">{isExpanded ? "▲" : "▼"}</span>
+            <span className="text-xs opacity-60 ml-auto">{isExpanded ? "▲" : "▼"}</span>
           </button>
         </div>
 

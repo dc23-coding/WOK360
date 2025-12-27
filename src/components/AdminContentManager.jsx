@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Music, Video, Image as ImageIcon, Trash2, Eye, EyeOff, Check, Upload } from "lucide-react";
-import { sanityClient } from "../lib/sanityClient";
+import { secureAdminCall } from "../lib/secureAdmin";
 import { Button } from "./ui/button";
 import ContentUploader from "../admin/ContentUploader";
 import { useZoneContext } from "../context/ZoneContext";
@@ -41,24 +41,7 @@ export default function AdminContentManager() {
   const fetchAllContent = async () => {
     setLoading(true);
     try {
-      const data = await sanityClient.fetch(
-        `*[_type == "mediaContent"] | order(_createdAt desc) {
-          _id,
-          _createdAt,
-          title,
-          subtitle,
-          zone,
-          wing,
-          room,
-          contentType,
-          accessLevel,
-          featured,
-          "thumbnailUrl": thumbnail.asset->url,
-          "mediaUrl": mediaFile.asset->url,
-          duration,
-          tags
-        }`
-      );
+      const { content: data } = await secureAdminCall('fetchAll');
       setContent(data || []);
     } catch (err) {
       console.error("Failed to fetch content:", err);
@@ -72,10 +55,10 @@ export default function AdminContentManager() {
     try {
       console.log(`[AdminContentManager] Updating ${contentId} to room: ${newRoom}`);
       
-      const result = await sanityClient
-        .patch(contentId)
-        .set({ room: newRoom })
-        .commit();
+      const { result } = await secureAdminCall('updateRoom', {
+        contentId,
+        newRoom
+      });
       
       console.log(`[AdminContentManager] Successfully updated:`, result);
       
@@ -97,10 +80,10 @@ export default function AdminContentManager() {
   const toggleFeatured = async (contentId, currentFeatured) => {
     setUpdating(contentId);
     try {
-      await sanityClient
-        .patch(contentId)
-        .set({ featured: !currentFeatured })
-        .commit();
+      await secureAdminCall('toggleFeatured', {
+        contentId,
+        featured: !currentFeatured
+      });
       
       setContent(prev => prev.map(item => 
         item._id === contentId ? { ...item, featured: !currentFeatured } : item
@@ -117,7 +100,7 @@ export default function AdminContentManager() {
     
     setUpdating(contentId);
     try {
-      await sanityClient.delete(contentId);
+      await secureAdminCall('delete', { contentId });
       setContent(prev => prev.filter(item => item._id !== contentId));
     } catch (err) {
       console.error("Failed to delete:", err);

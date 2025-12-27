@@ -30,10 +30,16 @@ export default function HeroDoor({ onEnterHouse, onAdminAccess }) {
   };
 
   const handleEnterHouse = () => {
-    // Play doorbell sound
-    const doorbell = new Audio('/doorbell.mp3');
-    doorbell.volume = 0.4;
-    doorbell.play().catch(() => {/* ignore */});
+    // Play doorbell sound (optional - graceful fallback)
+    try {
+      const doorbell = new Audio('/doorbell.mp3');
+      doorbell.volume = 0.4;
+      doorbell.play().catch(() => {
+        console.log('Doorbell audio not available');
+      });
+    } catch (err) {
+      // Audio not critical, continue silently
+    }
     
     onEnterHouse();
   };

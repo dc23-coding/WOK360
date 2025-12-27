@@ -31,14 +31,14 @@ export default function SignUpForKeyModal({ variant = "light", onClose, onSucces
 
     try {
       // Check if email already exists
-      const { data: existing } = await supabase
+      const { data: existing, error: existError } = await supabase
         .from('access_keys')
         .select('code, name')
-        .eq('email', email)
-        .single();
+        .eq('email', email.trim().toLowerCase());
 
-      if (existing) {
-        setGeneratedCode(existing.code);
+      // If user exists, show their existing code
+      if (existing && existing.length > 0) {
+        setGeneratedCode(existing[0].code);
         setIsSubmitting(false);
         return;
       }
@@ -53,26 +53,29 @@ export default function SignUpForKeyModal({ variant = "light", onClose, onSucces
 
       if (createError) throw createError;
 
-      if (data && data.code) {
-        setGeneratedCode(data.code);
+      // RPC returns an array with one object
+      const result = Array.isArray(data) ? data[0] : data;
+
+      if (result && result.code) {
+        setGeneratedCode(result.code);
         
         // Fetch full user object
         const { data: user } = await supabase
           .from('access_keys')
           .select('*')
-          .eq('code', data.code)
+          .eq('code', result.code)
           .single();
 
         setTimeout(() => {
-          onSuccess?.(user || { code: data.code });
+          onSuccess?.(user || { code: result.code, name: result.name, email: result.email });
         }, 2000);
       } else {
-        throw new Error("No code returned");
+        throw new Error("No code returned from create_access_key function");
       }
 
     } catch (err) {
       console.error("Sign up error:", err);
-      setError(err.message || "Failed to create access key");
+      setError(err.message || "Failed to create access key. Please try again.");
     } finally {
       setIsSubmitting(false);
     }

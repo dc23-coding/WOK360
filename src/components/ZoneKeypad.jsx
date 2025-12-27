@@ -154,7 +154,7 @@ export default function ZoneKeypad({
   };
 
   return (
-    <div className="relative w-full h-full flex flex-col items-center justify-center">
+    <div className="relative w-full max-h-[90vh] flex flex-col items-center justify-center overflow-y-auto py-4">
       {/* Access Denied Modal */}
       <AnimatePresence>
         {accessStatus && !accessStatus.granted && (
@@ -190,7 +190,7 @@ export default function ZoneKeypad({
 
       {/* Keypad Container */}
       <motion.div
-        className={`relative w-[290px] md:w-[320px] rounded-[32px] px-6 py-7 md:px-7 md:py-8 flex flex-col items-center justify-center transition-transform duration-300 ${
+        className={`relative w-[290px] md:w-[320px] rounded-[32px] px-6 py-7 md:px-7 md:py-8 flex flex-col items-center justify-center transition-transform duration-300 mb-4 ${
           isDark
             ? "bg-slate-900/92 border border-cyan-500/80 shadow-[0_0_90px_rgba(34,211,238,0.9)]"
             : "bg-black/92 border border-amber-300/80 shadow-[0_0_90px_rgba(252,211,77,0.9)]"

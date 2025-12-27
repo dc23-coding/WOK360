@@ -30,7 +30,7 @@ export default function LightStudio() {
   };
 
   return (
-    <RoomSection bg="/Playroom_Light.png" className="bg-white">
+    <RoomSection bg="/Playroom_Light.webp" className="bg-white">
       <div className="relative w-full h-full flex items-center justify-center px-4 py-8 md:py-0">
         
         {/* Main Conference Container */}

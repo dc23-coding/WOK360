@@ -80,7 +80,7 @@ export default function LightBedroom({ onToggleMode }) {
   };
 
   return (
-    <RoomSection bg="/Bedroon_Light.png" className="bg-white" id="light-bedroom">
+    <RoomSection bg="/Bedroon_Light.webp" className="bg-white" id="light-bedroom">
       <div className="relative w-full h-full flex items-center justify-center px-4 py-8 md:py-0">
         
         {/* Main Container */}

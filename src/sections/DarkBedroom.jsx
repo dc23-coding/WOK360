@@ -61,7 +61,7 @@ export default function DarkBedroom({ onToggleMode }) {
   };
 
   return (
-    <RoomSection bg="/Bedroom_Dark.png" className="bg-black">
+    <RoomSection bg="/Bedroom_Dark.webp" className="bg-black">
       <AskCleAssistant />
       <div className="relative w-full h-full flex items-center justify-center">
         {/* GLOBAL SENSOR TOGGLE – top-right */}

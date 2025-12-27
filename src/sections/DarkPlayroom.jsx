@@ -90,7 +90,7 @@ export default function DarkPlayroom() {
   };
 
   return (
-    <RoomSection bg="/Playroom_Dark.png" className="bg-black">
+    <RoomSection bg="/Playroom_Dark.webp" className="bg-black">
       <AskCleAssistant />
       <div className="relative w-full h-full flex flex-col items-center justify-center text-cyan-50 px-4 py-8">
         

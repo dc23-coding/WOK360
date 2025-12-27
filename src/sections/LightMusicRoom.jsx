@@ -3,7 +3,7 @@ import RoomSection from "../components/RoomSection";
 
 export default function LightMusicRoom({ onToggleMode }) {
   return (
-    <RoomSection bg="/Hallway_Light.png" className="bg-white">
+    <RoomSection bg="/Hallway_Light.webp" className="bg-white">
       <div className="relative w-full h-full flex items-center justify-center text-center text-amber-900 px-4">
         {/* Theme toggle button */}
         <button

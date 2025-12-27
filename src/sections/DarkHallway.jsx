@@ -20,7 +20,7 @@ export default function DarkHallway({ mode, onToggleMode, onNavigate }) {
   ];
 
   return (
-    <RoomSection bg="/Hallway_Dark.png" className="bg-black" >
+    <RoomSection bg="/Hallway_Dark.webp" className="bg-black" >
       {/* Admin Content Manager Overlay */}
       {showControlRoom && (
         <div className="absolute inset-0 z-50 bg-black/95 backdrop-blur-xl">

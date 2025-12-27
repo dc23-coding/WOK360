@@ -14,8 +14,14 @@ export default function VibePlayer({ variant = "dark", mode = "vod", locked = fa
 
   // Fetch content assigned to this room
   useEffect(() => {
+    // Support multiple room ID variants for backwards compatibility
+    const roomVariants = [roomId];
+    if (roomId === 'club-main-stage') {
+      roomVariants.push('club-dance-floor', 'club-hollywood-main');
+    }
+    
     sanityClient.fetch(
-      `*[_type == "mediaContent" && room == $roomId && defined(mediaFile.asset)] | order(_createdAt desc) {
+      `*[_type == "mediaContent" && room in $rooms && defined(mediaFile.asset)] | order(_createdAt desc) {
         _id,
         title,
         subtitle,
@@ -28,12 +34,12 @@ export default function VibePlayer({ variant = "dark", mode = "vod", locked = fa
         room,
         zone
       }`,
-      { roomId }
+      { rooms: roomVariants }
     ).then(data => {
       setVibes(data || []);
       setLoading(false);
     }).catch(err => {
-      console.error(`[VibePlayer] Failed to load ${roomId}:`, err.message);
+      console.error(`[VibePlayer] Failed to load content:`, err.message);
       setLoading(false);
     });
   }, [roomId]);
@@ -56,10 +62,9 @@ export default function VibePlayer({ variant = "dark", mode = "vod", locked = fa
       <div className={`rounded-2xl border backdrop-blur p-8 text-center ${
         isDark ? "border-cyan-500/30 bg-slate-900/80" : "border-purple-500/30 bg-slate-900/80"
       }`}>
-        <p className="text-white/60">No content assigned to this player yet.</p>
-        <p className="text-xs text-white/40 mt-2">Room ID: {roomId}</p>
-        <p className="text-xs text-white/40 mt-1">Use the Control Room in Dark Hallway to assign content</p>
-        <p className="text-xs text-amber-400 mt-2">🎛️ Go to: Dark Hallway → Content Control Room → Manage → Assign tracks to "🎭 Main Stage"</p>
+        <div className="text-4xl mb-4">🎵</div>
+        <p className="text-lg text-white/80 font-semibold mb-2">No Content Available</p>
+        <p className="text-sm text-white/50">This player is currently empty</p>
       </div>
     );
   }

@@ -14,7 +14,7 @@ export const sanityClient = createClient({
   // Only use direct API if we have a token for authenticated requests
   useCdn: isProduction && !hasToken,
   token: import.meta.env.VITE_SANITY_AUTH_TOKEN, // Optional - for admin operations
-  perspective: 'previewDrafts', // Show drafts and published content
+  perspective: 'published', // Show published content (use 'drafts' to include unpublished)
 });
 
 // Helper for generating image URLs with transformations

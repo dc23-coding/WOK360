@@ -91,12 +91,12 @@ export default function ClubHollywoodWorld({ onExitWorld }) {
           {/* Center - Main Stage Player */}
           <div className="flex-1 flex items-center justify-center p-4 sm:p-6 md:p-8">
             <div className="w-full max-w-5xl">
-              {/* Vibe Player - Automatically pulls content from club-dance-floor */}
+              {/* Vibe Player - Automatically pulls content from club-main-stage */}
               <VibePlayer
                 variant="dark"
                 mode="vod"
                 locked={false}
-                roomId="club-dance-floor"
+                roomId="club-main-stage"
               />
             </div>
           </div>

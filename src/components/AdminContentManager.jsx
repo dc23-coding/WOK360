@@ -340,8 +340,8 @@ export default function AdminContentManager() {
                         <option value="featured">⭐ Featured/Homepage</option>
                         <optgroup label="Club Hollywood">
                           <option value="club-main-stage">🎭 Main Stage</option>
+                          <option value="club-dance-floor">🕺 Dance Floor (Legacy)</option>
                           <option value="club-vip">💎 VIP Lounge</option>
-                          <option value="club-dance-floor">🕺 Dance Floor</option>
                         </optgroup>
                       </select>
                       {item.room && (

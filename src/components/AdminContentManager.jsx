@@ -331,18 +331,20 @@ export default function AdminContentManager() {
                         }`}
                       >
                         <option value="">-- Not Published --</option>
-                        <option value="music-room">🎵 Music Room</option>
-                        <option value="studio">🎙️ Studio</option>
-                        <option value="bedroom">🛏️ Bedroom</option>
-                        <option value="photo-gallery">🖼️ Photo Gallery</option>
-                        <option value="merch-shop">🛍️ Merch Shop</option>
-                        <option value="playroom">🎮 Playroom (Dark)</option>
-                        <option value="featured">⭐ Featured/Homepage</option>
+                        <optgroup label="Kazmo Mansion - Light Wing">
+                          <option value="music-room">🎵 Music Room</option>
+                          <option value="photo-gallery">🖼️ Photo Gallery</option>
+                          <option value="merch-shop">🛍️ Merch Shop</option>
+                          <option value="ask-cle">🤖 Ask Cle</option>
+                        </optgroup>
+                        <optgroup label="Kazmo Mansion - Dark Wing">
+                          <option value="dark-bedroom">🛏️ Private Bedroom</option>
+                          <option value="dark-studio">🎙️ Exclusive Studio</option>
+                        </optgroup>
                         <optgroup label="Club Hollywood">
                           <option value="club-main-stage">🎭 Main Stage</option>
-                          <option value="club-dance-floor">🕺 Dance Floor (Legacy)</option>
-                          <option value="club-vip">💎 VIP Lounge</option>
                         </optgroup>
+                        <option value="featured">⭐ Featured/Homepage</option>
                       </select>
                       {item.room && (
                         <p className="text-[9px] text-green-400/60 mt-1">

@@ -14,14 +14,8 @@ export default function VibePlayer({ variant = "dark", mode = "vod", locked = fa
 
   // Fetch content assigned to this room
   useEffect(() => {
-    // Support multiple room ID variants for backwards compatibility
-    const roomVariants = [roomId];
-    if (roomId === 'club-main-stage') {
-      roomVariants.push('club-dance-floor', 'club-hollywood-main');
-    }
-    
     sanityClient.fetch(
-      `*[_type == "mediaContent" && room in $rooms && defined(mediaFile.asset)] | order(_createdAt desc) {
+      `*[_type == "mediaContent" && room == $roomId && defined(mediaFile.asset)] | order(_createdAt desc) {
         _id,
         title,
         subtitle,
@@ -34,7 +28,7 @@ export default function VibePlayer({ variant = "dark", mode = "vod", locked = fa
         room,
         zone
       }`,
-      { rooms: roomVariants }
+      { roomId }
     ).then(data => {
       setVibes(data || []);
       setLoading(false);
